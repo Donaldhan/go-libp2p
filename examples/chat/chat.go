@@ -48,20 +48,23 @@ import (
 	"github.com/multiformats/go-multiaddr"
 )
 
+// 处理流
 func handleStream(s network.Stream) {
 	log.Println("Got a new stream!")
 
-	// Create a buffer stream for non blocking read and write.
+	// Create a buffer stream for non blocking read and write. 创建非阻塞的待缓存空间的流
 	rw := bufio.NewReadWriter(bufio.NewReader(s), bufio.NewWriter(s))
-
+	//创建读写data goroutine
 	go readData(rw)
 	go writeData(rw)
 
 	// stream 's' will stay open until you close it (or the other side closes it).
 }
 
+// 从缓存空间读数据
 func readData(rw *bufio.ReadWriter) {
 	for {
+		//读取一行数据
 		str, _ := rw.ReadString('\n')
 
 		if str == "" {
@@ -76,7 +79,9 @@ func readData(rw *bufio.ReadWriter) {
 	}
 }
 
+// 写数据
 func writeData(rw *bufio.ReadWriter) {
+	//标准控制台输入Reader
 	stdReader := bufio.NewReader(os.Stdin)
 
 	for {
@@ -86,14 +91,16 @@ func writeData(rw *bufio.ReadWriter) {
 			log.Println(err)
 			return
 		}
-
+		//写控制台数据，并flush
 		rw.WriteString(fmt.Sprintf("%s\n", sendData))
 		rw.Flush()
 	}
 }
 
 func main() {
+	//常见结束时关闭的Host
 	ctx, cancel := context.WithCancel(context.Background())
+	//main 进程结束时，关闭host
 	defer cancel()
 
 	sourcePort := flag.Int("sp", 0, "Source port number")
@@ -113,6 +120,7 @@ func main() {
 
 	// If debug is enabled, use a constant random source to generate the peer ID. Only useful for debugging,
 	// off by default. Otherwise, it uses rand.Reader.
+	//创peerId读取器
 	var r io.Reader
 	if *debug {
 		// Use the port number as the randomness source.
@@ -122,7 +130,7 @@ func main() {
 	} else {
 		r = rand.Reader
 	}
-
+	// 创建host
 	h, err := makeHost(*sourcePort, r)
 	if err != nil {
 		log.Println(err)
@@ -139,27 +147,29 @@ func main() {
 		}
 
 		// Create a thread to read and write data.
+		// 创建读写数据线程
 		go writeData(rw)
 		go readData(rw)
 
 	}
 
-	// Wait forever
+	// Wait forever 等待select
 	select {}
 }
 
+// 创建host
 func makeHost(port int, randomness io.Reader) (host.Host, error) {
-	// Creates a new RSA key pair for this host.
+	// Creates a new RSA key pair for this host. 公私钥
 	prvKey, _, err := crypto.GenerateKeyPairWithReader(crypto.RSA, 2048, randomness)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
-	// 0.0.0.0 will listen on any interface device.
+	// 0.0.0.0 will listen on any interface device. 创建多播地址
 	sourceMultiAddr, _ := multiaddr.NewMultiaddr(fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", port))
 
-	// libp2p.New constructs a new libp2p Host.
+	// libp2p.New constructs a new libp2p Host. 创建host
 	// Other options can be added here.
 	return libp2p.New(
 		libp2p.ListenAddrs(sourceMultiAddr),
@@ -167,6 +177,7 @@ func makeHost(port int, randomness io.Reader) (host.Host, error) {
 	)
 }
 
+// 开启服务端peer
 func startPeer(ctx context.Context, h host.Host, streamHandler network.StreamHandler) {
 	// Set a function as stream handler.
 	// This function is called when a peer connects, and starts a stream with this protocol.
@@ -175,6 +186,7 @@ func startPeer(ctx context.Context, h host.Host, streamHandler network.StreamHan
 
 	// Let's get the actual TCP port from our listen multiaddr, in case we're using 0 (default; random available port).
 	var port string
+	//开启监听，多地址监听
 	for _, la := range h.Network().ListenAddresses() {
 		if p, err := la.ValueForProtocol(multiaddr.P_TCP); err == nil {
 			port = p
@@ -193,6 +205,7 @@ func startPeer(ctx context.Context, h host.Host, streamHandler network.StreamHan
 	log.Println()
 }
 
+// 开启客户端，并连接Server
 func startPeerAndConnect(ctx context.Context, h host.Host, destination string) (*bufio.ReadWriter, error) {
 	log.Println("This node's multiaddresses:")
 	for _, la := range h.Addrs() {
@@ -200,26 +213,27 @@ func startPeerAndConnect(ctx context.Context, h host.Host, destination string) (
 	}
 	log.Println()
 
-	// Turn the destination into a multiaddr.
+	// Turn the destination into a multiaddr. 转换目的地址为多播地址
 	maddr, err := multiaddr.NewMultiaddr(destination)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
-	// Extract the peer ID from the multiaddr.
+	// Extract the peer ID from the multiaddr. 从多播地址解析出peerId
 	info, err := peer.AddrInfoFromP2pAddr(maddr)
 	if err != nil {
 		log.Println(err)
 		return nil, err
 	}
 
-	// Add the destination's peer multiaddress in the peerstore.
-	// This will be used during connection and stream creation by libp2p.
+	// Add the destination's peer multiaddress in the peerstore. 添加目的peer的多播地址到peerstore
+	// This will be used during connection and stream creation by libp2p. 用于libp2p创建流连接
 	h.Peerstore().AddAddrs(info.ID, info.Addrs, peerstore.PermanentAddrTTL)
 
 	// Start a stream with the destination.
 	// Multiaddress of the destination peer is fetched from the peerstore using 'peerId'.
+	// 开启到目的地的流；目的peer的多播地址从peerId的peerstore抓取
 	s, err := h.NewStream(context.Background(), info.ID, "/chat/1.0.0")
 	if err != nil {
 		log.Println(err)
@@ -228,6 +242,7 @@ func startPeerAndConnect(ctx context.Context, h host.Host, destination string) (
 	log.Println("Established connection to destination")
 
 	// Create a buffered stream so that read and writes are non blocking.
+	//创建非阻塞的读写缓存流
 	rw := bufio.NewReadWriter(bufio.NewReader(s), bufio.NewWriter(s))
 
 	return rw, nil

@@ -30,34 +30,37 @@ func main() {
 	// all loggers with:
 	golog.SetAllLoggers(golog.LevelInfo) // Change to INFO for extra info
 
-	// Parse options from the command line
-	listenF := flag.Int("l", 0, "wait for incoming connections")
-	targetF := flag.String("d", "", "target peer to dial")
-	insecureF := flag.Bool("insecure", false, "use an unencrypted connection")
-	seedF := flag.Int64("seed", 0, "set random seed for id generation")
+	// Parse options from the command line 从命令行解析参数
+	listenF := flag.Int("l", 0, "wait for incoming connections")               //监听端口
+	targetF := flag.String("d", "", "target peer to dial")                     //拨号的目标pper
+	insecureF := flag.Bool("insecure", false, "use an unencrypted connection") //是否使用解密连接
+	seedF := flag.Int64("seed", 0, "set random seed for id generation")        //使用随机种子
 	flag.Parse()
 
 	if *listenF == 0 {
 		log.Fatal("Please provide a port to bind on with -l")
 	}
 
-	// Make a host that listens on the given multiaddress
+	// Make a host that listens on the given multiaddress 在给定多播地址下，监听host
 	ha, err := makeBasicHost(*listenF, *insecureF, *seedF)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	if *targetF == "" {
-		startListener(ctx, ha, *listenF, *insecureF)
+		startListener(ctx, ha, *listenF, *insecureF) //开启监听，server
 		// Run until canceled.
 		<-ctx.Done()
 	} else {
-		runSender(ctx, ha, *targetF)
+		runSender(ctx, ha, *targetF) // Dail client 拨号客户端
 	}
 }
 
 // makeBasicHost creates a LibP2P host with a random peer ID listening on the
 // given multiaddress. It won't encrypt the connection if insecure is true.
+/**
+ * 使用随机PeerId，创建一个多播地址监听的Host
+ */
 func makeBasicHost(listenPort int, insecure bool, randseed int64) (host.Host, error) {
 	var r io.Reader
 	if randseed == 0 {
@@ -86,6 +89,7 @@ func makeBasicHost(listenPort int, insecure bool, randseed int64) (host.Host, er
 	return libp2p.New(opts...)
 }
 
+// 获取host地址
 func getHostAddress(ha host.Host) string {
 	// Build host multiaddress
 	hostAddr, _ := ma.NewMultiaddr(fmt.Sprintf("/p2p/%s", ha.ID().Pretty()))
@@ -96,11 +100,12 @@ func getHostAddress(ha host.Host) string {
 	return addr.Encapsulate(hostAddr).String()
 }
 
+// 开启监听
 func startListener(ctx context.Context, ha host.Host, listenPort int, insecure bool) {
 	fullAddr := getHostAddress(ha)
 	log.Printf("I am %s\n", fullAddr)
 
-	// Set a stream handler on host A. /echo/1.0.0 is
+	// Set a stream handler on host A. /echo/1.0.0 is 设置流处理器，协议名称为/echo/1.0.0
 	// a user-defined protocol name.
 	ha.SetStreamHandler("/echo/1.0.0", func(s network.Stream) {
 		log.Println("listener received new stream")
@@ -121,6 +126,7 @@ func startListener(ctx context.Context, ha host.Host, listenPort int, insecure b
 	}
 }
 
+// 运行发送消息client
 func runSender(ctx context.Context, ha host.Host, targetPeer string) {
 	fullAddr := getHostAddress(ha)
 	log.Printf("I am %s\n", fullAddr)
@@ -129,7 +135,7 @@ func runSender(ctx context.Context, ha host.Host, targetPeer string) {
 	// a user-defined protocol name.
 	ha.SetStreamHandler("/echo/1.0.0", func(s network.Stream) {
 		log.Println("sender received new stream")
-		if err := doEcho(s); err != nil {
+		if err := doEcho(s); err != nil { //打印收到的信息
 			log.Println(err)
 			s.Reset()
 		} else {
@@ -144,7 +150,7 @@ func runSender(ctx context.Context, ha host.Host, targetPeer string) {
 		return
 	}
 
-	// Extract the peer ID from the multiaddr.
+	// Extract the peer ID from the multiaddr. 多播地址peerID
 	info, err := peer.AddrInfoFromP2pAddr(maddr)
 	if err != nil {
 		log.Println(err)
@@ -153,12 +159,14 @@ func runSender(ctx context.Context, ha host.Host, targetPeer string) {
 
 	// We have a peer ID and a targetAddr so we add it to the peerstore
 	// so LibP2P knows how to contact it
+	// 拥有了PeerID和目标地址，添加目标地址到PeerStore，以便LibP2P支持知道如何连接它
 	ha.Peerstore().AddAddrs(info.ID, info.Addrs, peerstore.PermanentAddrTTL)
 
 	log.Println("sender opening stream")
 	// make a new stream from host B to host A
 	// it should be handled on host A by the handler we set above because
 	// we use the same /echo/1.0.0 protocol
+	// 创建 host B to host A的流，使用相同的协议/echo/1.0.0
 	s, err := ha.NewStream(context.Background(), info.ID, "/echo/1.0.0")
 	if err != nil {
 		log.Println(err)
@@ -166,12 +174,13 @@ func runSender(ctx context.Context, ha host.Host, targetPeer string) {
 	}
 
 	log.Println("sender saying hello")
+	//向对方发送hello
 	_, err = s.Write([]byte("Hello, world!\n"))
 	if err != nil {
 		log.Println(err)
 		return
 	}
-
+	//读取stream流数据
 	out, err := io.ReadAll(s)
 	if err != nil {
 		log.Println(err)
@@ -182,6 +191,7 @@ func runSender(ctx context.Context, ha host.Host, targetPeer string) {
 }
 
 // doEcho reads a line of data a stream and writes it back
+// 从stream读取一行数据，并写会
 func doEcho(s network.Stream) error {
 	buf := bufio.NewReader(s)
 	str, err := buf.ReadString('\n')

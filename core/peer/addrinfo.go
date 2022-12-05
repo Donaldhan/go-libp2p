@@ -9,8 +9,8 @@ import (
 // AddrInfo is a small struct used to pass around a peer with
 // a set of addresses (and later, keys?).
 type AddrInfo struct {
-	ID    ID
-	Addrs []ma.Multiaddr
+	ID    ID             //peerId
+	Addrs []ma.Multiaddr //地址
 }
 
 var _ fmt.Stringer = AddrInfo{}
@@ -72,6 +72,7 @@ func AddrInfoFromString(s string) (*AddrInfo, error) {
 }
 
 // AddrInfoFromP2pAddr converts a Multiaddr to an AddrInfo.
+// 转换Multiaddr 到AddrInfo
 func AddrInfoFromP2pAddr(m ma.Multiaddr) (*AddrInfo, error) {
 	transport, id := SplitAddr(m)
 	if id == "" {

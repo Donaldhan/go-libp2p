@@ -37,6 +37,7 @@ var (
 // are, in fact, permanent)
 const (
 	// PermanentAddrTTL is the ttl for a "permanent address" (e.g. bootstrap nodes).
+	//永久地址生存时间TTL
 	PermanentAddrTTL = math.MaxInt64 - iota
 
 	// ConnectedAddrTTL is the ttl used for the addresses of a peer to whom

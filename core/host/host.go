@@ -23,13 +23,13 @@ import (
 // It is called Host because it is both Server and Client (and Peer
 // may be confusing).
 type Host interface {
-	// ID returns the (local) peer.ID associated with this Host
+	// ID returns the (local) peer.ID associated with this Host peerId 唯一标识
 	ID() peer.ID
 
-	// Peerstore returns the Host's repository of Peer Addresses and Keys.
+	// Peerstore returns the Host's repository of Peer Addresses and Keys. peer地址和key存储
 	Peerstore() peerstore.Peerstore
 
-	// Returns the listen addresses of the Host
+	// Returns the listen addresses of the Host 监听的地址
 	Addrs() []ma.Multiaddr
 
 	// Networks returns the Network interface of the Host
@@ -49,10 +49,12 @@ type Host interface {
 	// This is equivalent to:
 	//   host.Mux().SetHandler(proto, handler)
 	// (Threadsafe)
+	// 设置host的多路服用的，协议处理器
 	SetStreamHandler(pid protocol.ID, handler network.StreamHandler)
 
 	// SetStreamHandlerMatch sets the protocol handler on the Host's Mux
 	// using a matching function for protocol selection.
+	// 设置用于协议选择匹配协议处理器
 	SetStreamHandlerMatch(protocol.ID, func(string) bool, network.StreamHandler)
 
 	// RemoveStreamHandler removes a handler on the mux that was set by

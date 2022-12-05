@@ -20,6 +20,7 @@ func TestMain(t *testing.T) {
 	h.Run(t, func() {
 		// Create a context that will stop the hosts when the tests end
 		ctx, cancel := context.WithCancel(context.Background())
+		// 退出时，cancel ，stop host
 		defer cancel()
 
 		// Get a tcp port for the listener
@@ -42,17 +43,17 @@ func TestMain(t *testing.T) {
 			log.Println(err)
 			return
 		}
-
+		//监听
 		startListener(ctx, lh, lport, true)
 
-		// Make sender
+		// Make sender 获取监听服务端监听地址
 		listenAddr := getHostAddress(lh)
 		sh, err := makeBasicHost(sport, true, 2)
 		if err != nil {
 			log.Println(err)
 			return
 		}
-
+		//client dial拨号
 		runSender(ctx, sh, listenAddr)
 	})
 }
