@@ -31,10 +31,10 @@ func SupportsDecay(mgr ConnManager) (Decayer, bool) {
 // ConnManagers supporting decaying tags implement Decayer. Use the
 // SupportsDecay function to safely cast an instance to Decayer, if supported.
 type ConnManager interface {
-	// TagPeer tags a peer with a string, associating a weight with the tag.
+	// TagPeer tags a peer with a string, associating a weight with the tag. 对peer打标
 	TagPeer(peer.ID, string, int)
 
-	// Untag removes the tagged value from the peer.
+	// Untag removes the tagged value from the peer.移除peer的tag
 	UntagPeer(p peer.ID, tag string)
 
 	// UpsertTag updates an existing tag or inserts a new one.
@@ -44,7 +44,7 @@ type ConnManager interface {
 	// the new value of the tag.
 	UpsertTag(p peer.ID, tag string, upsert func(int) int)
 
-	// GetTagInfo returns the metadata associated with the peer,
+	// GetTagInfo returns the metadata associated with the peer, 获取peer的tag信息
 	// or nil if no metadata has been recorded for the peer.
 	GetTagInfo(p peer.ID) *TagInfo
 
@@ -53,7 +53,7 @@ type ConnManager interface {
 	TrimOpenConns(ctx context.Context)
 
 	// Notifee returns an implementation that can be called back to inform of
-	// opened and closed connections.
+	// opened and closed connections. 连接Notifee，管理监听和连接
 	Notifee() network.Notifiee
 
 	// Protect protects a peer from having its connection(s) pruned.
@@ -62,15 +62,16 @@ type ConnManager interface {
 	//
 	// Calls to Protect() with the same tag are idempotent. They are not refcounted, so after multiple calls
 	// to Protect() with the same tag, a single Unprotect() call bearing the same tag will revoke the protection.
+	// 保护peer tag，设置tag，幂等
 	Protect(id peer.ID, tag string)
 
 	// Unprotect removes a protection that may have been placed on a peer, under the specified tag.
-	//
+	// 移除tag
 	// The return value indicates whether the peer continues to be protected after this call, by way of a different tag.
 	// See notes on Protect() for more info.
 	Unprotect(id peer.ID, tag string) (protected bool)
 
-	// IsProtected returns true if the peer is protected for some tag; if the tag is the empty string
+	// IsProtected returns true if the peer is protected for some tag; if the tag is the empty string tag是否受保护
 	// then it will return true if the peer is protected for any tag
 	IsProtected(id peer.ID, tag string) (protected bool)
 
@@ -78,12 +79,12 @@ type ConnManager interface {
 	Close() error
 }
 
-// TagInfo stores metadata associated with a peer.
+// TagInfo stores metadata associated with a peer. peer的tag信息
 type TagInfo struct {
 	FirstSeen time.Time
 	Value     int
 
-	// Tags maps tag ids to the numerical values.
+	// Tags maps tag ids to the numerical values. tag值
 	Tags map[string]int
 
 	// Conns maps connection ids (such as remote multiaddr) to their creation time.

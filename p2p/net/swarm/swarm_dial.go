@@ -105,7 +105,7 @@ var DefaultPerPeerRateLimit = 8
 //
 // * It's safe to use its zero value.
 // * It's thread-safe.
-// * It's *not* safe to move this type after using.
+// * It's *not* safe to move this type after using. 拨号备用地址
 type DialBackoff struct {
 	entries map[peer.ID]map[string]*backoffAddr
 	lock    sync.RWMutex

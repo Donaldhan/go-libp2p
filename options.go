@@ -338,6 +338,7 @@ func ForceReachabilityPrivate() Option {
 // EnableNATService configures libp2p to provide a service to peers for determining
 // their reachability status. When enabled, the host will attempt to dial back
 // to peers, and then tell them if it was successful in making such connections.
+// 开NAT服务配置，以便提供决定peer是否可达状态。 当开启时，host将会尝试dial back to peer；
 func EnableNATService() Option {
 	return func(cfg *Config) error {
 		cfg.AutoNATConfig.EnableService = true
@@ -388,6 +389,9 @@ func ResourceManager(rcmgr network.ResourceManager) Option {
 
 // NATPortMap configures libp2p to use the default NATManager. The default
 // NATManager will attempt to open a port in your network's firewall using UPnP.
+// https://zhuanlan.zhihu.com/p/40407669
+// 使用NATPortMap配置libp2p的默认NATManager管理器，默认情况下，NATManager将会尝试在你的
+// 网络防火墙，基于UPnP打开一个端口
 func NATPortMap() Option {
 	return NATManager(bhost.NewNATManager)
 }

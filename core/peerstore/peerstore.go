@@ -47,19 +47,19 @@ const (
 )
 
 // Peerstore provides a threadsafe store of Peer related
-// information.
+// information. peer相关信息的存储
 type Peerstore interface {
 	io.Closer
 
-	AddrBook
-	KeyBook
-	PeerMetadata
+	AddrBook     //peer的多播地址book
+	KeyBook      //peer的key Booke
+	PeerMetadata //Peer元数据
 	Metrics
-	ProtoBook
+	ProtoBook // peer支持的协议ProtoBook
 
 	// PeerInfo returns a peer.PeerInfo struct for given peer.ID.
 	// This is a small slice of the information Peerstore has on
-	// that peer, useful to other services.
+	// that peer, useful to other services.peer的地址信息
 	PeerInfo(peer.ID) peer.AddrInfo
 
 	// Peers returns all of the peer IDs stored across all inner stores.
@@ -72,7 +72,7 @@ type Peerstore interface {
 // serializer may be required.
 //
 // Refer to the docs of the underlying implementation for more
-// information.
+// information. Peer元数据
 type PeerMetadata interface {
 	// Get / Put is a simple registry for other peer-related key/value pairs.
 	// If we find something we use often, it should become its own set of
@@ -84,7 +84,7 @@ type PeerMetadata interface {
 	RemovePeer(peer.ID)
 }
 
-// AddrBook holds the multiaddrs of peers.
+// AddrBook holds the multiaddrs of peers. peer的多播地址book
 type AddrBook interface {
 	// AddAddr calls AddAddrs(p, []ma.Multiaddr{addr}, ttl)
 	AddAddr(p peer.ID, addr ma.Multiaddr, ttl time.Duration)
@@ -193,7 +193,7 @@ func GetCertifiedAddrBook(ab AddrBook) (cab CertifiedAddrBook, ok bool) {
 	return cab, ok
 }
 
-// KeyBook tracks the keys of Peers.
+// KeyBook tracks the keys of Peers. peer的key Booke
 type KeyBook interface {
 	// PubKey stores the public key of a peer.
 	PubKey(peer.ID) ic.PubKey
@@ -229,7 +229,7 @@ type Metrics interface {
 	RemovePeer(peer.ID)
 }
 
-// ProtoBook tracks the protocols supported by peers.
+// ProtoBook tracks the protocols supported by peers. peer支持的协议ProtoBook
 type ProtoBook interface {
 	GetProtocols(peer.ID) ([]string, error)
 	AddProtocols(peer.ID, ...string) error

@@ -128,33 +128,33 @@ type Network interface {
 	io.Closer
 
 	// SetStreamHandler sets the handler for new streams opened by the
-	// remote side. This operation is threadsafe.
+	// remote side. This operation is threadsafe. 设置流处理器
 	SetStreamHandler(StreamHandler)
 
-	// NewStream returns a new stream to given peer p.
+	// NewStream returns a new stream to given peer p. 新创建一个流
 	// If there is no connection to p, attempts to create one.
 	NewStream(context.Context, peer.ID) (Stream, error)
 
-	// Listen tells the network to start listening on given multiaddrs.
+	// Listen tells the network to start listening on given multiaddrs. 监听多播地址
 	Listen(...ma.Multiaddr) error
 
-	// ListenAddresses returns a list of addresses at which this network listens.
+	// ListenAddresses returns a list of addresses at which this network listens. 获取监听的地址
 	ListenAddresses() []ma.Multiaddr
 
 	// InterfaceListenAddresses returns a list of addresses at which this network
 	// listens. It expands "any interface" addresses (/ip4/0.0.0.0, /ip6/::) to
-	// use the known local interfaces.
+	// use the known local interfaces. 网络监听地址
 	InterfaceListenAddresses() ([]ma.Multiaddr, error)
 
-	// ResourceManager returns the ResourceManager associated with this network
+	// ResourceManager returns the ResourceManager associated with this network 网络资源管理器
 	ResourceManager() ResourceManager
 }
 
-// Dialer represents a service that can dial out to peers
+// Dialer represents a service that can dial out to peers 表示一个可以dial Peers的Dialer
 // (this is usually just a Network, but other services may not need the whole
 // stack, and thus it becomes easier to mock)
 type Dialer interface {
-	// Peerstore returns the internal peerstore
+	// Peerstore returns the internal peerstore peer存储
 	// This is useful to tell the dialer about a new address for a peer.
 	// Or use one of the public keys found out over the network.
 	Peerstore() peerstore.Peerstore

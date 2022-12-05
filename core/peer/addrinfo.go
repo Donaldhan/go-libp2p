@@ -7,7 +7,7 @@ import (
 )
 
 // AddrInfo is a small struct used to pass around a peer with
-// a set of addresses (and later, keys?).
+// a set of addresses (and later, keys?). 地址信息
 type AddrInfo struct {
 	ID    ID             //peerId
 	Addrs []ma.Multiaddr //地址

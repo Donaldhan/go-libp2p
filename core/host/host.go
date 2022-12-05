@@ -35,7 +35,7 @@ type Host interface {
 	// Networks returns the Network interface of the Host
 	Network() network.Network
 
-	// Mux returns the Mux multiplexing incoming streams to protocol handlers
+	// Mux returns the Mux multiplexing incoming streams to protocol handlers 用于处理incoming流的多路复用器
 	Mux() protocol.Switch
 
 	// Connect ensures there is a connection between this host and the peer with
@@ -43,6 +43,7 @@ type Host interface {
 	// peerstore. If there is not an active connection, Connect will issue a
 	// h.Network.Dial, and block until a connection is open, or an error is
 	// returned. // TODO: Relay + NAT.
+	// 确保当前host和peer的连接，如果没有激活的连接，连接将会发从一个Dail拨号，阻塞到连接建立
 	Connect(ctx context.Context, pi peer.AddrInfo) error
 
 	// SetStreamHandler sets the protocol handler on the Host's Mux.
@@ -58,22 +59,22 @@ type Host interface {
 	SetStreamHandlerMatch(protocol.ID, func(string) bool, network.StreamHandler)
 
 	// RemoveStreamHandler removes a handler on the mux that was set by
-	// SetStreamHandler
+	// SetStreamHandler 移除流处理器
 	RemoveStreamHandler(pid protocol.ID)
 
 	// NewStream opens a new stream to given peer p, and writes a p2p/protocol
 	// header with given ProtocolID. If there is no connection to p, attempts
 	// to create one. If ProtocolID is "", writes no header.
-	// (Threadsafe)
+	// (Threadsafe) 打开到给定peer的流
 	NewStream(ctx context.Context, p peer.ID, pids ...protocol.ID) (network.Stream, error)
 
-	// Close shuts down the host, its Network, and services.
+	// Close shuts down the host, its Network, and services. 关闭节点
 	Close() error
 
-	// ConnManager returns this hosts connection manager
+	// ConnManager returns this hosts connection manager 连接管理器
 	ConnManager() connmgr.ConnManager
 
-	// EventBus returns the hosts eventbus
+	// EventBus returns the hosts eventbus 事件bus
 	EventBus() event.Bus
 }
 

@@ -11,7 +11,7 @@ import (
 // dialWorkerFunc is used by dialSync to spawn a new dial worker
 type dialWorkerFunc func(peer.ID, <-chan dialRequest)
 
-// newDialSync constructs a new dialSync
+// newDialSync constructs a new dialSync 创建dialSync
 func newDialSync(worker dialWorkerFunc) *dialSync {
 	return &dialSync{
 		dials:      make(map[peer.ID]*activeDial),

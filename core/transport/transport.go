@@ -99,16 +99,17 @@ type TransportNetwork interface {
 	network.Network
 
 	// AddTransport adds a transport to this Network.
-	//
+	// 添加一个transport到当前网络
 	// When dialing, this Network will iterate over the protocols in the
 	// remote multiaddr and pick the first protocol registered with a proxy
 	// transport, if any. Otherwise, it'll pick the transport registered to
 	// handle the last protocol in the multiaddr.
-	//
+	// 当拨号时，这个网络将会遍历iterate远端多播地址的协议，并选择注册到代理transport的协议
 	// When listening, this Network will iterate over the protocols in the
 	// local multiaddr and pick the *last* protocol registered with a proxy
 	// transport, if any. Otherwise, it'll pick the transport registered to
 	// handle the last protocol in the multiaddr.
+	//
 	AddTransport(t Transport) error
 }
 

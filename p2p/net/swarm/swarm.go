@@ -155,6 +155,8 @@ type Swarm struct {
 }
 
 // NewSwarm constructs a Swarm.
+// https://goethereumbook.org/zh/swarm/
+// https://github.com/ethersphere/swarm
 func NewSwarm(local peer.ID, peers peerstore.Peerstore, opts ...Option) (*Swarm, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	s := &Swarm{
@@ -180,8 +182,9 @@ func NewSwarm(local peer.ID, peers peerstore.Peerstore, opts ...Option) (*Swarm,
 	if s.rcmgr == nil {
 		s.rcmgr = &network.NullResourceManager{}
 	}
-
+	// 创建dialSync
 	s.dsync = newDialSync(s.dialWorkerLoop)
+	//创建拨号Limiter
 	s.limiter = newDialLimiter(s.dialAddr)
 	s.backf.init(s.ctx)
 	return s, nil

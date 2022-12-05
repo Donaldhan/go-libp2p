@@ -52,7 +52,7 @@ var (
 )
 
 // AddrsFactory functions can be passed to New in order to override
-// addresses returned by Addrs.
+// addresses returned by Addrs. 地址工厂
 type AddrsFactory func([]ma.Multiaddr) []ma.Multiaddr
 
 // BasicHost is the basic implementation of the host.Host interface. This

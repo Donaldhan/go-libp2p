@@ -42,18 +42,19 @@ import (
 // returns the set of multiaddrs we should advertise to the network.
 type AddrsFactory = bhost.AddrsFactory
 
-// NATManagerC is a NATManager constructor.
+// NATManagerC is a NATManager constructor. Nat管理器
 type NATManagerC func(network.Network) bhost.NATManager
 
+// host路由
 type RoutingC func(host.Host) (routing.PeerRouting, error)
 
 // AutoNATConfig defines the AutoNAT behavior for the libp2p host.
 type AutoNATConfig struct {
 	ForceReachability   *network.Reachability
-	EnableService       bool
-	ThrottleGlobalLimit int
-	ThrottlePeerLimit   int
-	ThrottleInterval    time.Duration
+	EnableService       bool          //autonat 启用装填
+	ThrottleGlobalLimit int           //
+	ThrottlePeerLimit   int           //peer限制阈值
+	ThrottleInterval    time.Duration //阈值刷新间隔？？
 }
 
 type Security struct {
@@ -62,31 +63,31 @@ type Security struct {
 }
 
 // Config describes a set of settings for a libp2p node
-//
+// p2p节点的配置秒速
 // This is *not* a stable interface. Use the options defined in the root
 // package.
 type Config struct {
 	// UserAgent is the identifier this node will send to other peers when
 	// identifying itself, e.g. via the identify protocol.
-	//
+	// identify协议下的用户代理
 	// Set it via the UserAgent option function.
 	UserAgent string
 
 	// ProtocolVersion is the protocol version that identifies the family
 	// of protocols used by the peer in the Identify protocol. It is set
-	// using the [ProtocolVersion] option.
+	// using the [ProtocolVersion] option. 协议版本
 	ProtocolVersion string
 
 	PeerKey crypto.PrivKey
 
 	QUICReuse          []fx.Option
-	Transports         []fx.Option
-	Muxers             []tptu.StreamMuxer
+	Transports         []fx.Option        //传输端口
+	Muxers             []tptu.StreamMuxer //流多路复用器
 	SecurityTransports []Security
 	Insecure           bool
 	PSK                pnet.PSK
 
-	DialTimeout time.Duration
+	DialTimeout time.Duration //拨号超时时间
 
 	RelayCustom bool
 	Relay       bool // should the relay transport be used
@@ -95,32 +96,32 @@ type Config struct {
 	RelayServiceOpts   []relayv2.Option
 
 	ListenAddrs     []ma.Multiaddr
-	AddrsFactory    bhost.AddrsFactory
+	AddrsFactory    bhost.AddrsFactory //地址工厂
 	ConnectionGater connmgr.ConnectionGater
 
-	ConnManager     connmgr.ConnManager
-	ResourceManager network.ResourceManager
+	ConnManager     connmgr.ConnManager     //连接管理器
+	ResourceManager network.ResourceManager //资源管理器
 
-	NATManager NATManagerC
-	Peerstore  peerstore.Peerstore
+	NATManager NATManagerC         //Nat管理
+	Peerstore  peerstore.Peerstore //Peer存储
 	Reporter   metrics.Reporter
 
 	MultiaddrResolver *madns.Resolver
 
-	DisablePing bool
+	DisablePing bool //关闭Ping
 
-	Routing RoutingC
+	Routing RoutingC //peer路由
 
 	EnableAutoRelay bool
 	AutoRelayOpts   []autorelay.Option
-	AutoNATConfig
+	AutoNATConfig   //auto nat config
 
 	EnableHolePunching  bool
 	HolePunchingOptions []holepunch.Option
 }
 
 func (cfg *Config) makeSwarm() (*swarm.Swarm, error) {
-	if cfg.Peerstore == nil {
+	if cfg.Peerstore == nil { //检查peer store
 		return nil, fmt.Errorf("no peerstore specified")
 	}
 
@@ -134,16 +135,16 @@ func (cfg *Config) makeSwarm() (*swarm.Swarm, error) {
 		return nil, pnet.ErrNotInPrivateNetwork
 	}
 
-	if cfg.PeerKey == nil {
+	if cfg.PeerKey == nil { //检查peer key
 		return nil, fmt.Errorf("no peer key specified")
 	}
 
-	// Obtain Peer ID from public key
+	// Obtain Peer ID from public key 从取peer的 public key 获取peerID
 	pid, err := peer.IDFromPublicKey(cfg.PeerKey.GetPublic())
 	if err != nil {
 		return nil, err
 	}
-
+	//添加公私钥到Peerstore
 	if err := cfg.Peerstore.AddPrivKey(pid, cfg.PeerKey); err != nil {
 		return nil, err
 	}
@@ -159,18 +160,21 @@ func (cfg *Config) makeSwarm() (*swarm.Swarm, error) {
 		opts = append(opts, swarm.WithConnectionGater(cfg.ConnectionGater))
 	}
 	if cfg.DialTimeout != 0 {
+		//Dial超时
 		opts = append(opts, swarm.WithDialTimeout(cfg.DialTimeout))
 	}
-	if cfg.ResourceManager != nil {
+	if cfg.ResourceManager != nil { //资源管理器
 		opts = append(opts, swarm.WithResourceManager(cfg.ResourceManager))
 	}
-	if cfg.MultiaddrResolver != nil {
+	if cfg.MultiaddrResolver != nil { //多播地址解决器
 		opts = append(opts, swarm.WithMultiaddrResolver(cfg.MultiaddrResolver))
 	}
-	// TODO: Make the swarm implementation configurable.
+	// TODO: Make the swarm implementation configurable. 创建Swarm
+	//https://github.com/ethersphere/swarm
 	return swarm.NewSwarm(pid, cfg.Peerstore, opts...)
 }
 
+// 添加host
 func (cfg *Config) addTransports(h host.Host) error {
 	swrm, ok := h.Network().(transport.TransportNetwork)
 	if !ok {
@@ -183,15 +187,15 @@ func (cfg *Config) addTransports(h host.Host) error {
 		fx.Provide(fx.Annotate(tptu.New, fx.ParamTags(`name:"security"`))),
 		fx.Supply(cfg.Muxers),
 		fx.Supply(h.ID()),
-		fx.Provide(func() host.Host { return h }),
-		fx.Provide(func() crypto.PrivKey { return h.Peerstore().PrivKey(h.ID()) }),
+		fx.Provide(func() host.Host { return h }), //Host
+		fx.Provide(func() crypto.PrivKey { return h.Peerstore().PrivKey(h.ID()) }), //私钥
 		fx.Provide(func() connmgr.ConnectionGater { return cfg.ConnectionGater }),
 		fx.Provide(func() pnet.PSK { return cfg.PSK }),
-		fx.Provide(func() network.ResourceManager { return cfg.ResourceManager }),
+		fx.Provide(func() network.ResourceManager { return cfg.ResourceManager }), //资源管理器
 		fx.Provide(func() *madns.Resolver { return cfg.MultiaddrResolver }),
 	}
 	fxopts = append(fxopts, cfg.Transports...)
-	if cfg.Insecure {
+	if cfg.Insecure { //安全
 		fxopts = append(fxopts,
 			fx.Provide(
 				fx.Annotate(
@@ -275,12 +279,13 @@ func (cfg *Config) addTransports(h host.Host) error {
 // NewNode constructs a new libp2p Host from the Config.
 //
 // This function consumes the config. Do not reuse it (really!).
+// 创建node
 func (cfg *Config) NewNode() (host.Host, error) {
 	swrm, err := cfg.makeSwarm()
 	if err != nil {
 		return nil, err
 	}
-
+	//创建host
 	h, err := bhost.NewHost(swrm, &bhost.HostOpts{
 		ConnManager:         cfg.ConnManager,
 		AddrsFactory:        cfg.AddrsFactory,
@@ -298,7 +303,7 @@ func (cfg *Config) NewNode() (host.Host, error) {
 		return nil, err
 	}
 
-	if cfg.Relay {
+	if cfg.Relay { //中继器
 		// If we've enabled the relay, we should filter out relay
 		// addresses by default.
 		//
@@ -308,22 +313,22 @@ func (cfg *Config) NewNode() (host.Host, error) {
 			return oldFactory(autorelay.Filter(addrs))
 		}
 	}
-
+	//添加host到Transports
 	if err := cfg.addTransports(h); err != nil {
 		h.Close()
 		return nil, err
 	}
 
 	// TODO: This method succeeds if listening on one address succeeds. We
-	// should probably fail if listening on *any* addr fails.
+	// should probably fail if listening on *any* addr fails. 开启监听
 	if err := h.Network().Listen(cfg.ListenAddrs...); err != nil {
 		h.Close()
 		return nil, err
 	}
 
-	// Configure routing and autorelay
+	// Configure routing and autorelay 配置路由，自动安驰
 	var router routing.PeerRouting
-	if cfg.Routing != nil {
+	if cfg.Routing != nil { //host路由
 		router, err = cfg.Routing(h)
 		if err != nil {
 			h.Close()
@@ -332,15 +337,15 @@ func (cfg *Config) NewNode() (host.Host, error) {
 	}
 
 	// Note: h.AddrsFactory may be changed by relayFinder, but non-relay version is
-	// used by AutoNAT below.
+	// used by AutoNAT below. host的地址工厂可以被relayFinder修改，但是非延迟版本使用如下AutoNAT
 	var ar *autorelay.AutoRelay
 	addrF := h.AddrsFactory
-	if cfg.EnableAutoRelay {
+	if cfg.EnableAutoRelay { //开启自动中继
 		if !cfg.Relay {
 			h.Close()
 			return nil, fmt.Errorf("cannot enable autorelay; relay is not enabled")
 		}
-
+		//中继节点
 		ar, err = autorelay.NewAutoRelay(h, cfg.AutoRelayOpts...)
 		if err != nil {
 			return nil, err
@@ -358,6 +363,7 @@ func (cfg *Config) NewNode() (host.Host, error) {
 			autonat.WithPeerThrottling(cfg.AutoNATConfig.ThrottlePeerLimit))
 	}
 	if cfg.AutoNATConfig.EnableService {
+		//生成公私钥
 		autonatPrivKey, _, err := crypto.GenerateEd25519Key(rand.Reader)
 		if err != nil {
 			return nil, err
@@ -428,7 +434,7 @@ func (cfg *Config) NewNode() (host.Host, error) {
 type Option func(cfg *Config) error
 
 // Apply applies the given options to the config, returning the first error
-// encountered (if any).
+// encountered (if any). 应用配置
 func (cfg *Config) Apply(opts ...Option) error {
 	for _, opt := range opts {
 		if opt == nil {

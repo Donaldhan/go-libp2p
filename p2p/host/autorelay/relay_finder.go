@@ -48,24 +48,25 @@ type candidate struct {
 }
 
 // relayFinder is a Host that uses relays for connectivity when a NAT is detected.
+// 中继发现器为host，当NAT探测连接性中继时使用
 type relayFinder struct {
-	bootTime time.Time
-	host     *basic.BasicHost
+	bootTime time.Time        //启动时间
+	host     *basic.BasicHost //host
 
 	conf *config
 
-	refCount sync.WaitGroup
+	refCount sync.WaitGroup //CountDownLock
 
-	ctxCancel   context.CancelFunc
-	ctxCancelMx sync.Mutex
+	ctxCancel   context.CancelFunc //取消功能
+	ctxCancelMx sync.Mutex         //互斥锁
 
-	peerSource func(context.Context, int) <-chan peer.AddrInfo
+	peerSource func(context.Context, int) <-chan peer.AddrInfo //源peer
 
-	candidateFound             chan struct{} // receives every time we find a new relay candidate
-	candidateMx                sync.Mutex
-	candidates                 map[peer.ID]*candidate
-	backoff                    map[peer.ID]time.Time
-	maybeConnectToRelayTrigger chan struct{} // cap: 1
+	candidateFound             chan struct{}          // receives every time we find a new relay candidate 候选通道
+	candidateMx                sync.Mutex             //候选互斥锁
+	candidates                 map[peer.ID]*candidate //候选peerId
+	backoff                    map[peer.ID]time.Time  //peer的备用时间
+	maybeConnectToRelayTrigger chan struct{}          // cap: 1
 	// Any time _something_ hapens that might cause us to need new candidates.
 	// This could be
 	// * the disconnection of a relay
@@ -73,15 +74,16 @@ type relayFinder struct {
 	// * a candidate is deleted due to its age
 	maybeRequestNewCandidates chan struct{} // cap: 1.
 
-	relayUpdated chan struct{}
+	relayUpdated chan struct{} //
 
 	relayMx sync.Mutex
 	relays  map[peer.ID]*circuitv2.Reservation // rsvp will be nil if it is a v1 relay
 
-	cachedAddrs       []ma.Multiaddr
-	cachedAddrsExpiry time.Time
+	cachedAddrs       []ma.Multiaddr //多播地址
+	cachedAddrsExpiry time.Time      //???
 }
 
+// 创建中继器发现者
 func newRelayFinder(host *basic.BasicHost, peerSource func(context.Context, int) <-chan peer.AddrInfo, conf *config) *relayFinder {
 	if peerSource == nil {
 		panic("Can not create a new relayFinder. Need a Peer Source fn or a list of static relays. Refer to the documentation around `libp2p.EnableAutoRelay`")
@@ -105,7 +107,7 @@ func newRelayFinder(host *basic.BasicHost, peerSource func(context.Context, int)
 func (rf *relayFinder) background(ctx context.Context) {
 	rf.refCount.Add(1)
 	go func() {
-		defer rf.refCount.Done()
+		defer rf.refCount.Done() //countdown
 		rf.findNodes(ctx)
 	}()
 

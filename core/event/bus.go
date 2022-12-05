@@ -41,7 +41,7 @@ type Subscription interface {
 	Out() <-chan interface{}
 }
 
-// Bus is an interface for a type-based event delivery system.
+// Bus is an interface for a type-based event delivery system. 基于时间的传输系统bus接口
 type Bus interface {
 	// Subscribe creates a new Subscription.
 	//
@@ -76,10 +76,11 @@ type Bus interface {
 	//        [...]
 	//    }
 	//  }
+	// 订阅事件类型
 	Subscribe(eventType interface{}, opts ...SubscriptionOpt) (Subscription, error)
 
 	// Emitter creates a new event emitter.
-	//
+	// 创建一个新事件的Emitter
 	// eventType accepts typed nil pointers, and uses the type information for wiring purposes.
 	//
 	// Example:
@@ -90,7 +91,7 @@ type Bus interface {
 
 	// GetAllEventTypes returns all the event types that this bus knows about
 	// (having emitters and subscribers). It omits the WildcardSubscription.
-	//
+	// 返回所有当前bus知道的事件类型
 	// The caller is guaranteed that this function will only return value types;
 	// no pointer types will be returned.
 	GetAllEventTypes() []reflect.Type

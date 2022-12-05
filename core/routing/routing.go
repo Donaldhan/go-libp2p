@@ -36,8 +36,8 @@ type ContentRouting interface {
 	FindProvidersAsync(context.Context, cid.Cid, int) <-chan peer.AddrInfo
 }
 
-// PeerRouting is a way to find address information about certain peers.
-// This can be implemented by a simple lookup table, a tracking server,
+// PeerRouting is a way to find address information about certain peers. 发现给定peer的信息路由
+// This can be implemented by a simple lookup table, a tracking server, 可以基于table的实现，一个追踪server；甚至DHT；
 // or even a DHT.
 type PeerRouting interface {
 	// FindPeer searches for a peer with given ID, returns a peer.AddrInfo

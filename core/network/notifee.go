@@ -5,12 +5,12 @@ import (
 )
 
 // Notifiee is an interface for an object wishing to receive
-// notifications from a Network.
+// notifications from a Network. 希望从网络中接受通知的Notifiee对象
 type Notifiee interface {
-	Listen(Network, ma.Multiaddr)      // called when network starts listening on an addr
-	ListenClose(Network, ma.Multiaddr) // called when network stops listening on an addr
-	Connected(Network, Conn)           // called when a connection opened
-	Disconnected(Network, Conn)        // called when a connection closed
+	Listen(Network, ma.Multiaddr)      // called when network starts listening on an addr 开启监听
+	ListenClose(Network, ma.Multiaddr) // called when network stops listening on an addr 关闭监听
+	Connected(Network, Conn)           // called when a connection opened 连接
+	Disconnected(Network, Conn)        // called when a connection closed 关闭连接
 }
 
 // NotifyBundle implements Notifiee by calling any of the functions set on it,

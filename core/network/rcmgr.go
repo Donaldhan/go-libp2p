@@ -10,7 +10,7 @@ import (
 // The ResourceManager tracks and accounts for resource usage in the stack, from the internals
 // to the application, and provides a mechanism to limit resource usage according to a user
 // configurable policy.
-//
+// 网络资源管理器
 // Resource Management through the ResourceManager is based on the concept of Resource
 // Management Scopes, whereby resource usage is constrained by a DAG of scopes,
 // The following diagram illustrates the structure of the resource constraint DAG:
@@ -31,7 +31,7 @@ import (
 // and file  descriptors. These account for both space and time used by
 // the stack, as each resource has a direct effect on the system
 // availability and performance.
-//
+// 资源管理器包含内存，流，连接，文件连接符
 // The modus operandi of the resource manager is to restrict resource usage at the time of
 // reservation. When a component of the stack needs to use a resource, it reserves it in the
 // appropriate scope. The resource manager gates the reservation against the scope applicable
@@ -83,7 +83,7 @@ type ResourceManager interface {
 	ResourceScopeViewer
 
 	// OpenConnection creates a new connection scope not yet associated with any peer; the connection
-	// is scoped at the transient scope.
+	// is scoped at the transient scope. 创建管理peer的连接
 	// The caller owns the returned scope and is responsible for calling Done in order to signify
 	// the end of the scope's span.
 	OpenConnection(dir Direction, usefd bool, endpoint multiaddr.Multiaddr) (ConnManagementScope, error)
@@ -142,7 +142,7 @@ const (
 	ReservationPriorityAlways uint8 = 255
 )
 
-// ResourceScope is the interface for all scopes.
+// ResourceScope is the interface for all scopes. 资源接口
 type ResourceScope interface {
 	// ReserveMemory reserves memory/buffer space in the scope; the unit is bytes.
 	//
@@ -155,14 +155,14 @@ type ResourceScope interface {
 	// For instance, a muxer growing a window buffer will use a low priority and only grow the buffer
 	// if there is no memory pressure in the system.
 	//
-	// The are 4 predefined priority levels, Low, Medium, High and Always,
+	// The are 4 predefined priority levels, Low, Medium, High and Always,分配内存
 	// capturing common patterns, but the user is free to use any granularity applicable to his case.
 	ReserveMemory(size int, prio uint8) error
 
-	// ReleaseMemory explicitly releases memory previously reserved with ReserveMemory
+	// ReleaseMemory explicitly releases memory previously reserved with ReserveMemory 释放内存
 	ReleaseMemory(size int)
 
-	// Stat retrieves current resource usage for the scope.
+	// Stat retrieves current resource usage for the scope. 资源使用状态
 	Stat() ScopeStat
 
 	// BeginSpan creates a new span scope rooted at this scope
@@ -174,6 +174,7 @@ type ResourceScope interface {
 // when the programmer calls Done.
 //
 // Example:
+// 示例
 //
 //	s, err := someScope.BeginSpan()
 //	if err != nil { ... }
@@ -183,11 +184,11 @@ type ResourceScope interface {
 //	// ... use memory
 type ResourceScopeSpan interface {
 	ResourceScope
-	// Done ends the span and releases associated resources.
+	// Done ends the span and releases associated resources. 释放关联的资源
 	Done()
 }
 
-// ServiceScope is the interface for service resource scopes
+// ServiceScope is the interface for service resource scopes Service资源Scopes
 type ServiceScope interface {
 	ResourceScope
 
@@ -195,7 +196,7 @@ type ServiceScope interface {
 	Name() string
 }
 
-// ProtocolScope is the interface for protocol resource scopes.
+// ProtocolScope is the interface for protocol resource scopes.协议资源Scope
 type ProtocolScope interface {
 	ResourceScope
 
@@ -203,15 +204,15 @@ type ProtocolScope interface {
 	Protocol() protocol.ID
 }
 
-// PeerScope is the interface for peer resource scopes.
+// PeerScope is the interface for peer resource scopes.Peer资源
 type PeerScope interface {
 	ResourceScope
 
-	// Peer returns the peer ID for this scope
+	// Peer returns the peer ID for this scope peerId
 	Peer() peer.ID
 }
 
-// ConnManagementScope is the low level interface for connection resource scopes.
+// ConnManagementScope is the low level interface for connection resource scopes. 连接资源管理Scope
 // This interface is used by the low level components of the system who create and own
 // the span of a connection scope.
 type ConnManagementScope interface {
@@ -225,33 +226,33 @@ type ConnManagementScope interface {
 	SetPeer(peer.ID) error
 }
 
-// ConnScope is the user view of a connection scope
+// ConnScope is the user view of a connection scope 连接Scope
 type ConnScope interface {
 	ResourceScope
 }
 
-// StreamManagementScope is the interface for stream resource scopes.
+// StreamManagementScope is the interface for stream resource scopes. 流管理scope
 // This interface is used by the low level components of the system who create and own
 // the span of a stream scope.
 type StreamManagementScope interface {
 	ResourceScopeSpan
 
 	// ProtocolScope returns the protocol resource scope associated with this stream.
-	// It returns nil if the stream is not associated with any protocol scope.
+	// It returns nil if the stream is not associated with any protocol scope. 协议资源
 	ProtocolScope() ProtocolScope
-	// SetProtocol sets the protocol for a previously unnegotiated stream
+	// SetProtocol sets the protocol for a previously unnegotiated stream 设置协议
 	SetProtocol(proto protocol.ID) error
 
-	// ServiceScope returns the service owning the stream, if any.
+	// ServiceScope returns the service owning the stream, if any. 服务资源
 	ServiceScope() ServiceScope
-	// SetService sets the service owning this stream.
+	// SetService sets the service owning this stream. 设置服务
 	SetService(srv string) error
 
-	// PeerScope returns the peer resource scope associated with this stream.
+	// PeerScope returns the peer resource scope associated with this stream. pee资源
 	PeerScope() PeerScope
 }
 
-// StreamScope is the user view of a StreamScope.
+// StreamScope is the user view of a StreamScope. 流Scope
 type StreamScope interface {
 	ResourceScope
 
@@ -259,13 +260,13 @@ type StreamScope interface {
 	SetService(srv string) error
 }
 
-// ScopeStat is a struct containing resource accounting information.
+// ScopeStat is a struct containing resource accounting information. 资源管理状态
 type ScopeStat struct {
-	NumStreamsInbound  int
-	NumStreamsOutbound int
-	NumConnsInbound    int
-	NumConnsOutbound   int
-	NumFD              int
+	NumStreamsInbound  int // in流数量
+	NumStreamsOutbound int //out流数量
+	NumConnsInbound    int //in连接数
+	NumConnsOutbound   int //out连接数据
+	NumFD              int //文件描述符
 
 	Memory int64
 }

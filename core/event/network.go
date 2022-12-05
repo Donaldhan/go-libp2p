@@ -47,6 +47,7 @@ import (
 // Explanation: There were two connections and one was cut. This connection
 // might have been in active use but neither peer will observe a change in
 // "connectedness". Peers should always make sure to re-try network requests.
+// 节点连接状态
 type EvtPeerConnectednessChanged struct {
 	// Peer is the remote peer who's connectedness has changed.
 	Peer peer.ID
