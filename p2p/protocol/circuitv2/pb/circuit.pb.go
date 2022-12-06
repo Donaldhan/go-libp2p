@@ -368,11 +368,11 @@ func (m *Peer) GetAddrs() [][]byte {
 	}
 	return nil
 }
-
+//中继器预约信息，protobuf
 type Reservation struct {
-	Expire               *uint64  `protobuf:"varint,1,req,name=expire" json:"expire,omitempty"`
-	Addrs                [][]byte `protobuf:"bytes,2,rep,name=addrs" json:"addrs,omitempty"`
-	Voucher              []byte   `protobuf:"bytes,3,opt,name=voucher" json:"voucher,omitempty"`
+	Expire               *uint64  `protobuf:"varint,1,req,name=expire" json:"expire,omitempty"` //过期时间
+	Addrs                [][]byte `protobuf:"bytes,2,rep,name=addrs" json:"addrs,omitempty"` //地址
+	Voucher              []byte   `protobuf:"bytes,3,opt,name=voucher" json:"voucher,omitempty"` //凭证
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`

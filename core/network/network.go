@@ -74,16 +74,16 @@ type Reachability int
 
 const (
 	// ReachabilityUnknown indicates that the reachability status of the
-	// node is unknown.
+	// node is unknown. 节点未知
 	ReachabilityUnknown Reachability = iota
 
 	// ReachabilityPublic indicates that the node is reachable from the
-	// public internet.
+	// public internet.节点公网可达
 	ReachabilityPublic
 
 	// ReachabilityPrivate indicates that the node is not reachable from the
 	// public internet.
-	//
+	// 节点公网不可达， 但是节点仍有可能通过中继器可达
 	// NOTE: This node may _still_ be reachable via relays.
 	ReachabilityPrivate
 )
@@ -99,7 +99,7 @@ func (r Reachability) String() string {
 // ConnStats stores metadata pertaining to a given Conn.
 type ConnStats struct {
 	Stats
-	// NumStreams is the number of streams on the connection.
+	// NumStreams is the number of streams on the connection. 在当前连接上的流数量
 	NumStreams int
 }
 
@@ -107,9 +107,9 @@ type ConnStats struct {
 type Stats struct {
 	// Direction specifies whether this is an inbound or an outbound connection.
 	Direction Direction
-	// Opened is the timestamp when this connection was opened.
+	// Opened is the timestamp when this connection was opened. 连接开启时间
 	Opened time.Time
-	// Transient indicates that this connection is transient and may be closed soon.
+	// Transient indicates that this connection is transient and may be closed soon. 通道瞬态标志，表示连接即将关闭
 	Transient bool
 	// Extra stores additional metadata about this connection.
 	Extra map[interface{}]interface{}
@@ -124,7 +124,7 @@ type StreamHandler func(Stream)
 // connections (see swarm pkg, and peerstream.Swarm). Connections
 // are encrypted with a TLS-like protocol.
 type Network interface {
-	Dialer
+	Dialer //继承
 	io.Closer
 
 	// SetStreamHandler sets the handler for new streams opened by the
@@ -159,28 +159,28 @@ type Dialer interface {
 	// Or use one of the public keys found out over the network.
 	Peerstore() peerstore.Peerstore
 
-	// LocalPeer returns the local peer associated with this network
+	// LocalPeer returns the local peer associated with this network 本机节点地址
 	LocalPeer() peer.ID
 
-	// DialPeer establishes a connection to a given peer
+	// DialPeer establishes a connection to a given peer 拨号
 	DialPeer(context.Context, peer.ID) (Conn, error)
 
-	// ClosePeer closes the connection to a given peer
+	// ClosePeer closes the connection to a given peer 关闭给定节点的连接
 	ClosePeer(peer.ID) error
 
-	// Connectedness returns a state signaling connection capabilities
+	// Connectedness returns a state signaling connection capabilities 返回peer的连接状态
 	Connectedness(peer.ID) Connectedness
 
-	// Peers returns the peers connected
+	// Peers returns the peers connected 返回连接的peerID
 	Peers() []peer.ID
 
-	// Conns returns the connections in this Network
+	// Conns returns the connections in this Network 返回当前网络的连接
 	Conns() []Conn
 
-	// ConnsToPeer returns the connections in this Network for given peer.
+	// ConnsToPeer returns the connections in this Network for given peer. 返回给定peer所有网络连接
 	ConnsToPeer(p peer.ID) []Conn
 
-	// Notify/StopNotify register and unregister a notifiee for signals
+	// Notify/StopNotify register and unregister a notifiee for signals 注册或注销notifiee信号
 	Notify(Notifiee)
 	StopNotify(Notifiee)
 }

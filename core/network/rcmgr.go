@@ -138,7 +138,7 @@ const (
 	// memory utilization is at 80% or less.
 	ReservationPriorityHigh uint8 = 203
 	// ReservationPriorityAlways is a reservation priority that indicates a reservation if there is
-	// enough memory, regardless of scope utilization.
+	// enough memory, regardless of scope utilization. 如果内存足够，则预示着分配优先级较高，忽略scope优化
 	ReservationPriorityAlways uint8 = 255
 )
 

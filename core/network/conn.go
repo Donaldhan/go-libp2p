@@ -10,9 +10,10 @@ import (
 	ma "github.com/multiformats/go-multiaddr"
 )
 
-// Conn is a connection to a remote peer. It multiplexes streams.
+// Conn is a connection to a remote peer. It multiplexes streams. 到远端peer的连接，多路服用流
 // Usually there is no need to use a Conn directly, but it may
 // be useful to get information about the peer on the other side:
+// 通常，不需要直接使用连接，用于获取对等对应peer信息非常
 //
 //	stream.Conn().RemotePeer()
 type Conn interface {
@@ -27,7 +28,7 @@ type Conn interface {
 	// host, during this run. Connection IDs may repeat across restarts.
 	ID() string
 
-	// NewStream constructs a new Stream over this conn.
+	// NewStream constructs a new Stream over this conn. 创建流
 	NewStream(context.Context) (Stream, error)
 
 	// GetStreams returns all open streams over this conn.
@@ -36,16 +37,16 @@ type Conn interface {
 
 // ConnectionState holds information about the connection.
 type ConnectionState struct {
-	// The stream multiplexer used on this connection (if any). For example: /yamux/1.0.0
+	// The stream multiplexer used on this connection (if any). For example: /yamux/1.0.0 多路服用协议
 	StreamMultiplexer string
-	// The security protocol used on this connection (if any). For example: /tls/1.0.0
+	// The security protocol used on this connection (if any). For example: /tls/1.0.0 安全协议
 	Security string
-	// the transport used on this connection. For example: tcp
+	// the transport used on this connection. For example: tcp  transport 协议
 	Transport string
 }
 
 // ConnSecurity is the interface that one can mix into a connection interface to
-// give it the security methods.
+// give it the security methods. 连接Key安全接口
 type ConnSecurity interface {
 	// LocalPeer returns our peer ID
 	LocalPeer() peer.ID
@@ -64,7 +65,7 @@ type ConnSecurity interface {
 }
 
 // ConnMultiaddrs is an interface mixin for connection types that provide multiaddr
-// addresses for the endpoints.
+// addresses for the endpoints.  终端的多播地址
 type ConnMultiaddrs interface {
 	// LocalMultiaddr returns the local Multiaddr associated
 	// with this connection
@@ -75,7 +76,7 @@ type ConnMultiaddrs interface {
 	RemoteMultiaddr() ma.Multiaddr
 }
 
-// ConnStat is an interface mixin for connection types that provide connection statistics.
+// ConnStat is an interface mixin for connection types that provide connection statistics. 连接统计
 type ConnStat interface {
 	// Stat stores metadata pertaining to this conn.
 	Stat() ConnStats
@@ -84,6 +85,6 @@ type ConnStat interface {
 // ConnScoper is the interface that one can mix into a connection interface to give it a resource
 // management scope
 type ConnScoper interface {
-	// Scope returns the user view of this connection's resource scope
+	// Scope returns the user view of this connection's resource scope 资源SCOPe
 	Scope() ConnScope
 }

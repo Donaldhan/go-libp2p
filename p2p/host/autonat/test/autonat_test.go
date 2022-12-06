@@ -25,13 +25,13 @@ func TestAutonatRoundtrip(t *testing.T) {
 	//服务端
 	service, err := libp2p.New(libp2p.ListenAddrStrings("/ip4/127.0.0.1/tcp/0"))
 	require.NoError(t, err)
-	//dialback  dialer
+	//dialback  dialer， 回拨地址
 	dialback, err := libp2p.New(libp2p.NoListenAddrs)
 	require.NoError(t, err)
 
 	//创建autonet 服务
+	t.Fatal(err)
 	if _, err := autonat.New(service, autonat.EnableService(dialback.Network())); err != nil {
-		t.Fatal(err)
 	}
 	//添加autonat 服务地址到客户端的peerstore
 	client.Peerstore().AddAddrs(service.ID(), service.Addrs(), time.Hour)

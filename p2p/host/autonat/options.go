@@ -9,31 +9,33 @@ import (
 )
 
 // config holds configurable options for the autonat subsystem.
+// autonet系统的配置
 type config struct {
-	host host.Host
+	host host.Host // host 本机服务
 
-	addressFunc       AddrFunc
-	dialPolicy        dialPolicy
-	dialer            network.Network
-	forceReachability bool
-	reachability      network.Reachability
+	addressFunc       AddrFunc             //本地host对的候选地址函数
+	dialPolicy        dialPolicy           //拨号策略
+	dialer            network.Network      //拨号者
+	forceReachability bool                 //强制可达
+	reachability      network.Reachability // 网络可达性
 
-	// client
-	bootDelay          time.Duration
-	retryInterval      time.Duration
-	refreshInterval    time.Duration
-	requestTimeout     time.Duration
-	throttlePeerPeriod time.Duration
+	// client 客户端配置
+	bootDelay          time.Duration // boot延迟
+	retryInterval      time.Duration // 重试间隔
+	refreshInterval    time.Duration // 刷新间隔
+	requestTimeout     time.Duration // 请求超时时间
+	throttlePeerPeriod time.Duration // peer节流时间，退避间隔
 
-	// server
-	dialTimeout         time.Duration
-	maxPeerAddresses    int
-	throttleGlobalMax   int
-	throttlePeerMax     int
-	throttleResetPeriod time.Duration
-	throttleResetJitter time.Duration
+	// server 服务端配置
+	dialTimeout         time.Duration //拨号超时时间
+	maxPeerAddresses    int           //最大peer地址
+	throttleGlobalMax   int           //
+	throttlePeerMax     int           //
+	throttleResetPeriod time.Duration //
+	throttleResetJitter time.Duration //
 }
 
+// 默认配置
 var defaults = func(c *config) error {
 	c.bootDelay = 15 * time.Second
 	c.retryInterval = 90 * time.Second
@@ -56,18 +58,21 @@ var defaults = func(c *config) error {
 // make parallel connections, and as such will modify both the associated peerstore
 // and terminate connections of this dialer. The dialer provided
 // should be compatible (TCP/UDP) however with the transports of the libp2p network.
+// AutoNAT的EnableService服务，应该允许运行一个NAT服务，帮助其他peer节点确认网络状态。
+// 提供的网络，不能为默认的host的默认network/dialer，由于NAT系统需要并行连接，这样，将会
+// 修改peer及关联peer的peerstore。dialer应该提供与libp2p协议的兼容(TCP/UDP) transports
 func EnableService(dialer network.Network) Option {
 	return func(c *config) error {
-		if dialer == c.host.Network() || dialer.Peerstore() == c.host.Peerstore() {
+		if dialer == c.host.Network() || dialer.Peerstore() == c.host.Peerstore() { // 拨号网络不能为自己
 			return errors.New("dialer should not be that of the host")
 		}
-		c.dialer = dialer
+		c.dialer = dialer //拨号节点
 		return nil
 	}
 }
 
 // WithReachability overrides autonat to simply report an over-ridden reachability
-// status.
+// status. 可达， 重写autonat节点状态
 func WithReachability(reachability network.Reachability) Option {
 	return func(c *config) error {
 		c.forceReachability = true
@@ -79,7 +84,7 @@ func WithReachability(reachability network.Reachability) Option {
 // UsingAddresses allows overriding which Addresses the AutoNAT client believes
 // are "its own". Useful for testing, or for more exotic port-forwarding
 // scenarios where the host may be listening on different ports than it wants
-// to externally advertise or verify connectability on.
+// to externally advertise or verify connectability on. 可以地址方法
 func UsingAddresses(addrFunc AddrFunc) Option {
 	return func(c *config) error {
 		if addrFunc == nil {
@@ -94,7 +99,7 @@ func UsingAddresses(addrFunc AddrFunc) Option {
 // address of the host. retryInterval indicates how often probes should be made
 // when the host lacks confident about its address, while refresh interval
 // is the schedule of periodic probes when the host believes it knows its
-// steady-state reachability.
+// steady-state reachability. 配置探测间隔
 func WithSchedule(retryInterval, refreshInterval time.Duration) Option {
 	return func(c *config) error {
 		c.retryInterval = retryInterval
@@ -105,7 +110,7 @@ func WithSchedule(retryInterval, refreshInterval time.Duration) Option {
 
 // WithoutStartupDelay removes the initial delay the NAT subsystem typically
 // uses as a buffer for ensuring that connectivity and guesses as to the hosts
-// local interfaces have settled down during startup.
+// local interfaces have settled down during startup. 启动延迟
 func WithoutStartupDelay() Option {
 	return func(c *config) error {
 		c.bootDelay = 1
@@ -115,7 +120,7 @@ func WithoutStartupDelay() Option {
 
 // WithoutThrottling indicates that this autonat service should not place
 // restrictions on how many peers it is willing to help when acting as
-// a server.
+// a server. 退避探测时间
 func WithoutThrottling() Option {
 	return func(c *config) error {
 		c.throttleGlobalMax = 0

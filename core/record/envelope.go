@@ -17,23 +17,24 @@ import (
 )
 
 // Envelope contains an arbitrary []byte payload, signed by a libp2p peer.
-//
+// Envelopes 包含一个武断的负载，libp2p peer签名
 // Envelopes are signed in the context of a particular "domain", which is a
 // string specified when creating and verifying the envelope. You must know the
 // domain string used to produce the envelope in order to verify the signature
 // and access the payload.
+// 当创建和验证信封时，信封使用特殊的域名签名。同时你必须知道为了验证签名的访问的域名
 type Envelope struct {
 	// The public key that can be used to verify the signature and derive the peer id of the signer.
 	PublicKey crypto.PubKey
 
 	// A binary identifier that indicates what kind of data is contained in the payload.
-	// TODO(yusef): enforce multicodec prefix
+	// TODO(yusef): enforce multicodec prefix  节点identifier负载
 	PayloadType []byte
 
-	// The envelope payload.
+	// The envelope payload. 信封负载
 	RawPayload []byte
 
-	// The signature of the domain string :: type hint :: payload.
+	// The signature of the domain string :: type hint :: payload. 签名
 	signature []byte
 
 	// the unmarshalled payload as a Record, cached on first access via the Record accessor method

@@ -35,12 +35,13 @@ func cleanupAddressSet(addrs []ma.Multiaddr) []ma.Multiaddr {
 	return sanitizeAddrsplodedSet(public, private)
 }
 
+// 判断是否为中继地址
 func isRelayAddr(a ma.Multiaddr) bool {
 	isRelay := false
 
 	ma.ForEach(a, func(c ma.Component) bool {
 		switch c.Protocol().Code {
-		case ma.P_CIRCUIT:
+		case ma.P_CIRCUIT: //支持中继
 			isRelay = true
 			return false
 		default:

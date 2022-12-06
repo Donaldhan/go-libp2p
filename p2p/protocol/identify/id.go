@@ -66,7 +66,7 @@ type IDService interface {
 	IdentifyConn(network.Conn)
 	// IdentifyWait triggers an identify (if the connection has not already been
 	// identified) and returns a channel that is closed when the identify protocol
-	// completes.
+	// completes. 当identify完成，返回一个identify时，将会返回关闭的通道
 	IdentifyWait(network.Conn) <-chan struct{}
 	// OwnObservedAddrs returns the addresses peers have reported we've dialed from
 	OwnObservedAddrs() []ma.Multiaddr

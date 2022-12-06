@@ -20,23 +20,25 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
+// proto dial 拨号协议
+// https://github.com/libp2p/specs/blob/master/autonat/README.md
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type Message_MessageType int32
 
 const (
-	Message_DIAL          Message_MessageType = 0
-	Message_DIAL_RESPONSE Message_MessageType = 1
+	Message_DIAL          Message_MessageType = 0 //拨号消息
+	Message_DIAL_RESPONSE Message_MessageType = 1 //拨号响应
 )
 
 var Message_MessageType_name = map[int32]string{
-	0: "DIAL",
-	1: "DIAL_RESPONSE",
+	0: "DIAL",  //拨号消息
+	1: "DIAL_RESPONSE", //拨号响应
 }
 
 var Message_MessageType_value = map[string]int32{
-	"DIAL":          0,
-	"DIAL_RESPONSE": 1,
+	"DIAL":          0,  //拨号消息
+	"DIAL_RESPONSE": 1, //拨号响应
 }
 
 func (x Message_MessageType) Enum() *Message_MessageType {
@@ -65,11 +67,11 @@ func (Message_MessageType) EnumDescriptor() ([]byte, []int) {
 type Message_ResponseStatus int32
 
 const (
-	Message_OK               Message_ResponseStatus = 0
-	Message_E_DIAL_ERROR     Message_ResponseStatus = 100
-	Message_E_DIAL_REFUSED   Message_ResponseStatus = 101
-	Message_E_BAD_REQUEST    Message_ResponseStatus = 200
-	Message_E_INTERNAL_ERROR Message_ResponseStatus = 300
+	Message_OK               Message_ResponseStatus = 0  //拨号成功响应
+	Message_E_DIAL_ERROR     Message_ResponseStatus = 100 //拨号响应拒绝
+	Message_E_DIAL_REFUSED   Message_ResponseStatus = 101 //拨号响应重用
+	Message_E_BAD_REQUEST    Message_ResponseStatus = 200 //拨号响应Bad请求
+	Message_E_INTERNAL_ERROR Message_ResponseStatus = 300 //拨号响应内部错误
 )
 
 var Message_ResponseStatus_name = map[int32]string{
@@ -110,7 +112,7 @@ func (x *Message_ResponseStatus) UnmarshalJSON(data []byte) error {
 func (Message_ResponseStatus) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_a04e278ef61ac07a, []int{0, 1}
 }
-
+//Dail消息
 type Message struct {
 	Type                 *Message_MessageType  `protobuf:"varint,1,opt,name=type,enum=autonat.pb.Message_MessageType" json:"type,omitempty"`
 	Dial                 *Message_Dial         `protobuf:"bytes,2,opt,name=dial" json:"dial,omitempty"`
@@ -173,7 +175,7 @@ func (m *Message) GetDialResponse() *Message_DialResponse {
 	}
 	return nil
 }
-
+//peer消息
 type Message_PeerInfo struct {
 	Id                   []byte   `protobuf:"bytes,1,opt,name=id" json:"id,omitempty"`
 	Addrs                [][]byte `protobuf:"bytes,2,rep,name=addrs" json:"addrs,omitempty"`
@@ -228,7 +230,7 @@ func (m *Message_PeerInfo) GetAddrs() [][]byte {
 	}
 	return nil
 }
-
+//拨号消息
 type Message_Dial struct {
 	Peer                 *Message_PeerInfo `protobuf:"bytes,1,opt,name=peer" json:"peer,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}          `json:"-"`
@@ -275,7 +277,7 @@ func (m *Message_Dial) GetPeer() *Message_PeerInfo {
 	}
 	return nil
 }
-
+//拨号响应消息
 type Message_DialResponse struct {
 	Status               *Message_ResponseStatus `protobuf:"varint,1,opt,name=status,enum=autonat.pb.Message_ResponseStatus" json:"status,omitempty"`
 	StatusText           *string                 `protobuf:"bytes,2,opt,name=statusText" json:"statusText,omitempty"`
@@ -338,7 +340,7 @@ func (m *Message_DialResponse) GetAddr() []byte {
 	}
 	return nil
 }
-
+//初始化拨号协议
 func init() {
 	proto.RegisterEnum("autonat.pb.Message_MessageType", Message_MessageType_name, Message_MessageType_value)
 	proto.RegisterEnum("autonat.pb.Message_ResponseStatus", Message_ResponseStatus_name, Message_ResponseStatus_value)

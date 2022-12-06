@@ -33,7 +33,7 @@ import (
 )
 
 // ListenAddrStrings configures libp2p to listen on the given (unparsed)
-// addresses.
+// addresses. 监听地址
 func ListenAddrStrings(s ...string) Option {
 	return func(cfg *Config) error {
 		for _, addrstr := range s {
@@ -57,7 +57,7 @@ func ListenAddrs(addrs ...ma.Multiaddr) Option {
 
 // Security configures libp2p to use the given security transport (or transport
 // constructor).
-//
+// 构建安全的transport
 // Name is the protocol name.
 //
 // The transport can be a constructed security.Transport or a function taking
@@ -78,7 +78,7 @@ func Security(name string, constructor interface{}) Option {
 	}
 }
 
-// NoSecurity is an option that completely disables all transport security.
+// NoSecurity is an option that completely disables all transport security. 非安全的transport
 // It's incompatible with all other transport security protocols.
 var NoSecurity Option = func(cfg *Config) error {
 	if len(cfg.SecurityTransports) > 0 {
@@ -88,7 +88,7 @@ var NoSecurity Option = func(cfg *Config) error {
 	return nil
 }
 
-// Muxer configures libp2p to use the given stream multiplexer.
+// Muxer configures libp2p to use the given stream multiplexer. 多路复用器
 // name is the protocol name.
 func Muxer(name string, muxer network.Multiplexer) Option {
 	return func(cfg *Config) error {
@@ -97,6 +97,7 @@ func Muxer(name string, muxer network.Multiplexer) Option {
 	}
 }
 
+// QUIC
 func QUICReuse(constructor interface{}, opts ...quicreuse.Option) Option {
 	return func(cfg *Config) error {
 		tag := `group:"quicreuseopts"`
@@ -126,7 +127,7 @@ func QUICReuse(constructor interface{}, opts ...quicreuse.Option) Option {
 
 // Transport configures libp2p to use the given transport (or transport
 // constructor).
-//
+// Transport配置
 // The transport can be a constructed transport.Transport or a function taking
 // any subset of this libp2p node's:
 // * Transport Upgrader (*tptu.Upgrader)
@@ -192,7 +193,7 @@ func Transport(constructor interface{}, opts ...interface{}) Option {
 	}
 }
 
-// Peerstore configures libp2p to use the given peerstore.
+// Peerstore configures libp2p to use the given peerstore. peerStore配置
 func Peerstore(ps peerstore.Peerstore) Option {
 	return func(cfg *Config) error {
 		if cfg.Peerstore != nil {
@@ -204,7 +205,7 @@ func Peerstore(ps peerstore.Peerstore) Option {
 	}
 }
 
-// PrivateNetwork configures libp2p to use the given private network protector.
+// PrivateNetwork configures libp2p to use the given private network protector. 私有网络
 func PrivateNetwork(psk pnet.PSK) Option {
 	return func(cfg *Config) error {
 		if cfg.PSK != nil {
@@ -228,7 +229,7 @@ func BandwidthReporter(rep metrics.Reporter) Option {
 	}
 }
 
-// Identity configures libp2p to use the given private key to identify itself.
+// Identity configures libp2p to use the given private key to identify itself. 身份Key
 func Identity(sk crypto.PrivKey) Option {
 	return func(cfg *Config) error {
 		if cfg.PeerKey != nil {
@@ -240,7 +241,7 @@ func Identity(sk crypto.PrivKey) Option {
 	}
 }
 
-// ConnectionManager configures libp2p to use the given connection manager.
+// ConnectionManager configures libp2p to use the given connection manager. 连接管理器你
 //
 // The current "standard" connection manager lives in github.com/libp2p/go-libp2p-connmgr. See
 // https://pkg.go.dev/github.com/libp2p/go-libp2p-connmgr?utm_source=godoc#NewConnManager.
@@ -265,7 +266,7 @@ func AddrsFactory(factory config.AddrsFactory) Option {
 	}
 }
 
-// EnableRelay configures libp2p to enable the relay transport.
+// EnableRelay configures libp2p to enable the relay transport. 开启中继器
 // This option only configures libp2p to accept inbound connections from relays
 // and make outbound connections_through_ relays when requested by the remote peer.
 // This option supports both circuit v1 and v2 connections.
@@ -287,7 +288,7 @@ func DisableRelay() Option {
 	}
 }
 
-// EnableRelayService configures libp2p to run a circuit v2 relay,
+// EnableRelayService configures libp2p to run a circuit v2 relay, 开启中继服务
 // if we detect that we're publicly reachable.
 func EnableRelayService(opts ...relayv2.Option) Option {
 	return func(cfg *Config) error {
@@ -298,12 +299,12 @@ func EnableRelayService(opts ...relayv2.Option) Option {
 }
 
 // EnableAutoRelay configures libp2p to enable the AutoRelay subsystem.
-//
+// 开启中继延迟服务， 配置示例
 // Dependencies:
 //   - Relay (enabled by default)
 //   - Either:
-//     1. A list of static relays
-//     2. A PeerSource function that provides a chan of relays. See `autorelay.WithPeerSource`
+//     1. A list of static relays 静态中继器地址
+//     2. A PeerSource function that provides a chan of relays. See `autorelay.WithPeerSource` //提供中继服务的地址
 //
 // This subsystem performs automatic address rewriting to advertise relay addresses when it
 // detects that the node is publicly unreachable (e.g. behind a NAT).
@@ -316,7 +317,7 @@ func EnableAutoRelay(opts ...autorelay.Option) Option {
 }
 
 // ForceReachabilityPublic overrides automatic reachability detection in the AutoNAT subsystem,
-// forcing the local node to believe it is reachable externally.
+// forcing the local node to believe it is reachable externally. 强制公开可达
 func ForceReachabilityPublic() Option {
 	return func(cfg *Config) error {
 		public := network.Reachability(network.ReachabilityPublic)
@@ -326,7 +327,7 @@ func ForceReachabilityPublic() Option {
 }
 
 // ForceReachabilityPrivate overrides automatic reachability detection in the AutoNAT subsystem,
-// forceing the local node to believe it is behind a NAT and not reachable externally.
+// forceing the local node to believe it is behind a NAT and not reachable externally. 强制私有可达
 func ForceReachabilityPrivate() Option {
 	return func(cfg *Config) error {
 		private := network.Reachability(network.ReachabilityPrivate)
@@ -349,7 +350,7 @@ func EnableNATService() Option {
 // AutoNATServiceRateLimit changes the default rate limiting configured in helping
 // other peers determine their reachability status. When set, the host will limit
 // the number of requests it responds to in each 60 second period to the set
-// numbers. A value of '0' disables throttling.
+// numbers. A value of '0' disables throttling. autonat限制配置
 func AutoNATServiceRateLimit(global, perPeer int, interval time.Duration) Option {
 	return func(cfg *Config) error {
 		cfg.AutoNATConfig.ThrottleGlobalLimit = global
@@ -359,7 +360,7 @@ func AutoNATServiceRateLimit(global, perPeer int, interval time.Duration) Option
 	}
 }
 
-// ConnectionGater configures libp2p to use the given ConnectionGater
+// ConnectionGater configures libp2p to use the given ConnectionGater 连接网关
 // to actively reject inbound/outbound connections based on the lifecycle stage
 // of the connection.
 //
@@ -374,7 +375,7 @@ func ConnectionGater(cg connmgr.ConnectionGater) Option {
 	}
 }
 
-// ResourceManager configures libp2p to use the given ResourceManager.
+// ResourceManager configures libp2p to use the given ResourceManager. 资源管理器
 // When using the p2p/host/resource-manager implementation of the ResourceManager interface,
 // it is recommended to set limits for libp2p protocol by calling SetDefaultServiceLimits.
 func ResourceManager(rcmgr network.ResourceManager) Option {
@@ -396,7 +397,7 @@ func NATPortMap() Option {
 	return NATManager(bhost.NewNATManager)
 }
 
-// NATManager will configure libp2p to use the requested NATManager. This
+// NATManager will configure libp2p to use the requested NATManager. This NAT管理器
 // function should be passed a NATManager *constructor* that takes a libp2p Network.
 func NATManager(nm config.NATManagerC) Option {
 	return func(cfg *Config) error {
@@ -408,7 +409,7 @@ func NATManager(nm config.NATManagerC) Option {
 	}
 }
 
-// Ping will configure libp2p to support the ping service; enable by default.
+// Ping will configure libp2p to support the ping service; enable by default. 开启ping服务
 func Ping(enable bool) Option {
 	return func(cfg *Config) error {
 		cfg.DisablePing = !enable
@@ -416,7 +417,7 @@ func Ping(enable bool) Option {
 	}
 }
 
-// Routing will configure libp2p to use routing.
+// Routing will configure libp2p to use routing. 路由配置
 func Routing(rt config.RoutingC) Option {
 	return func(cfg *Config) error {
 		if cfg.Routing != nil {
@@ -445,13 +446,13 @@ var NoListenAddrs = func(cfg *Config) error {
 // NoTransports will configure libp2p to not enable any transports.
 //
 // This will both clear any configured transports (specified in prior libp2p
-// options) and prevent libp2p from applying the default transports.
+// options) and prevent libp2p from applying the default transports.  无transport
 var NoTransports = func(cfg *Config) error {
 	cfg.Transports = []fx.Option{}
 	return nil
 }
 
-// ProtocolVersion sets the protocolVersion string required by the
+// ProtocolVersion sets the protocolVersion string required by the 配置协议版本
 // libp2p Identify protocol.
 func ProtocolVersion(s string) Option {
 	return func(cfg *Config) error {
@@ -460,7 +461,7 @@ func ProtocolVersion(s string) Option {
 	}
 }
 
-// UserAgent sets the libp2p user-agent sent along with the identify protocol
+// UserAgent sets the libp2p user-agent sent along with the identify protocol 使用代理
 func UserAgent(userAgent string) Option {
 	return func(cfg *Config) error {
 		cfg.UserAgent = userAgent
@@ -468,7 +469,7 @@ func UserAgent(userAgent string) Option {
 	}
 }
 
-// MultiaddrResolver sets the libp2p dns resolver
+// MultiaddrResolver sets the libp2p dns resolver 多播解决器
 func MultiaddrResolver(rslv *madns.Resolver) Option {
 	return func(cfg *Config) error {
 		cfg.MultiaddrResolver = rslv
@@ -476,10 +477,16 @@ func MultiaddrResolver(rslv *madns.Resolver) Option {
 	}
 }
 
+// [家庭网络中的「NAT」到底是什么](https://zhuanlan.zhihu.com/p/410801432)
+// [互联网网关设备协议IGD(Internet Gateway Device)](https://zh.wikipedia.org/wiki/%E4%BA%92%E8%81%94%E7%BD%91%E7%BD%91%E5%85%B3%E8%AE%BE%E5%A4%87%E5%8D%8F%E8%AE%AE)
+// [NAT端口映射协议NAT-PMP](https://zh.wikipedia.org/wiki/NAT%E7%AB%AF%E5%8F%A3%E6%98%A0%E5%B0%84%E5%8D%8F%E8%AE%AE)
+// [P2P网络编程-1-从分布式Hash表到LibP2P包的基本概念与使用](https://blog.csdn.net/weixin_43988498/article/details/118878439)
+// [网络技术P2P技术原理浅析](https://keenjin.github.io/2021/04/p2p/)
+// [P2P通信原理与实现](https://zhuanlan.zhihu.com/p/26796476)
 // Experimental
 // EnableHolePunching enables NAT traversal by enabling NATT'd peers to both initiate and respond to hole punching attempts
 // to create direct/NAT-traversed connections with other peers. (default: disabled)
-//
+// 开启NAT打洞
 // Dependencies:
 //   - Relay (enabled by default)
 //

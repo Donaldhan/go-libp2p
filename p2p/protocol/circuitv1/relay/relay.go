@@ -22,7 +22,7 @@ import (
 var log = logging.Logger("relay")
 
 const (
-	ProtoID = "/libp2p/circuit/relay/0.1.0"
+	ProtoID = "/libp2p/circuit/relay/0.1.0" //中继协议
 
 	ServiceName = "libp2p.relay/v1"
 
@@ -385,8 +385,9 @@ func (r *Relay) handleError(s network.Stream, code pb.CircuitRelay_Status) {
 	}
 }
 
-// Queries a peer for support of hop relay
+// Queries a peer for support of hop relay 查询peer是否支持支持V2版本的hop
 func CanHop(ctx context.Context, host host.Host, id peer.ID) (bool, error) {
+	//创建协议ProtoID流
 	s, err := host.NewStream(ctx, id, ProtoID)
 	if err != nil {
 		return false, err
@@ -401,7 +402,7 @@ func CanHop(ctx context.Context, host host.Host, id peer.ID) (bool, error) {
 
 	msg.Type = pb.CircuitRelay_CAN_HOP.Enum()
 
-	if err := wr.WriteMsg(&msg); err != nil {
+	if err := wr.WriteMsg(&msg); err != nil { //写hop
 		s.Reset()
 		return false, err
 	}

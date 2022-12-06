@@ -9,8 +9,9 @@ import (
 	manet "github.com/multiformats/go-multiaddr/net"
 )
 
+// 拨号策略
 type dialPolicy struct {
-	allowSelfDials bool
+	allowSelfDials bool // 是否允许自己拨号自己？
 	host           host.Host
 }
 
@@ -56,9 +57,10 @@ func (d *dialPolicy) skipDial(addr ma.Multiaddr) bool {
 // isn't worth attempted dialing. If one of the addresses matches an address
 // we believe is ours, we exclude the peer, even if there are other valid
 // public addresses in the list.
+// 是否为应该跳过peer
 func (d *dialPolicy) skipPeer(addrs []ma.Multiaddr) bool {
-	localAddrs := d.host.Addrs()
-	localHosts := make([]net.IP, 0)
+	localAddrs := d.host.Addrs()    //本地地址
+	localHosts := make([]net.IP, 0) //本地host
 	for _, lAddr := range localAddrs {
 		if _, err := lAddr.ValueForProtocol(ma.P_CIRCUIT); err != nil && manet.IsPublicAddr(lAddr) {
 			lIP, err := manet.ToIP(lAddr)
@@ -70,6 +72,7 @@ func (d *dialPolicy) skipPeer(addrs []ma.Multiaddr) bool {
 	}
 
 	// if a public IP of the peer is one of ours: skip the peer.
+	// 如果公开ip是我们的peer，则跳过peer
 	goodPublic := false
 	for _, addr := range addrs {
 		if _, err := addr.ValueForProtocol(ma.P_CIRCUIT); err != nil && manet.IsPublicAddr(addr) {
@@ -79,7 +82,7 @@ func (d *dialPolicy) skipPeer(addrs []ma.Multiaddr) bool {
 			}
 
 			for _, lIP := range localHosts {
-				if lIP.Equal(aIP) {
+				if lIP.Equal(aIP) { //本地host包含对应的域名
 					return true
 				}
 			}

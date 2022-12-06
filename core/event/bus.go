@@ -33,11 +33,11 @@ type Emitter interface {
 	Emit(evt interface{}) error
 }
 
-// Subscription represents a subscription to one or multiple event types.
+// Subscription represents a subscription to one or multiple event types. 订阅
 type Subscription interface {
 	io.Closer
 
-	// Out returns the channel from which to consume events.
+	// Out returns the channel from which to consume events. 消耗事件通道
 	Out() <-chan interface{}
 }
 

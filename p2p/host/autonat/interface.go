@@ -23,11 +23,11 @@ type AutoNAT interface {
 // Client is a stateless client interface to AutoNAT peers
 type Client interface {
 	// DialBack requests from a peer providing AutoNAT services to test dial back
-	// and report the address on a successful connection.
+	// and report the address on a successful connection. 提供AutoNAT服务的peer，发送DialBack， 以报告连接成功
 	DialBack(ctx context.Context, p peer.ID) (ma.Multiaddr, error)
 }
 
-// AddrFunc is a function returning the candidate addresses for the local host.
+// AddrFunc is a function returning the candidate addresses for the local host. 返回本地host对的候选地址
 type AddrFunc func() []ma.Multiaddr
 
 // Option is an Autonat option for configuration

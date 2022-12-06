@@ -15,23 +15,24 @@ type config struct {
 	peerSource func(ctx context.Context, num int) <-chan peer.AddrInfo
 	// minimum interval used to call the peerSource callback
 	minInterval time.Duration
-	// see WithMinCandidates
+	// see WithMinCandidates 最小候选节点数
 	minCandidates int
-	// see WithMaxCandidates
+	// see WithMaxCandidates 最大候选节点数
 	maxCandidates int
-	// Delay until we obtain reservations with relays, if we have less than minCandidates candidates.
+	// Delay until we obtain reservations with relays, if we have less than minCandidates candidates. 延迟boot时间，直到我们获取预留的中继器数量
 	// See WithBootDelay.
 	bootDelay time.Duration
-	// backoff is the time we wait after failing to obtain a reservation with a candidate
+	// backoff is the time we wait after failing to obtain a reservation with a candidate 退避时间， 在我们获取候选的reservation失败时，等待的时间
 	backoff time.Duration
-	// Number of relays we strive to obtain a reservation with.
+	// Number of relays we strive to obtain a reservation with.  需要中继器数量
 	desiredRelays int
-	// see WithMaxCandidateAge
+	// see WithMaxCandidateAge 最大候选时间
 	maxCandidateAge  time.Duration
 	setMinCandidates bool
 	enableCircuitV1  bool
 }
 
+// 默认配置
 var defaultConfig = config{
 	clock:           clock.New(),
 	minCandidates:   4,
@@ -74,6 +75,7 @@ func WithStaticRelays(static []peer.AddrInfo) Option {
 	}
 }
 
+// 配置peersource
 // WithPeerSource defines a callback for AutoRelay to query for more relay candidates.
 // AutoRelay will call this function when it needs new candidates is connected to the desired number of
 // relays, and it has enough candidates (in case we get disconnected from one of the relays).
@@ -104,7 +106,7 @@ func WithNumRelays(n int) Option {
 	}
 }
 
-// WithMaxCandidates sets the number of relay candidates that we buffer.
+// WithMaxCandidates sets the number of relay candidates that we buffer. 最大候选者
 func WithMaxCandidates(n int) Option {
 	return func(c *config) error {
 		c.maxCandidates = n
@@ -115,7 +117,7 @@ func WithMaxCandidates(n int) Option {
 	}
 }
 
-// WithMinCandidates sets the minimum number of relay candidates we collect before to get a reservation
+// WithMinCandidates sets the minimum number of relay candidates we collect before to get a reservation 最小候选者
 // with any of them (unless we've been running for longer than the boot delay).
 // This is to make sure that we don't just randomly connect to the first candidate that we discover.
 func WithMinCandidates(n int) Option {
@@ -129,7 +131,7 @@ func WithMinCandidates(n int) Option {
 	}
 }
 
-// WithBootDelay set the boot delay for finding relays.
+// WithBootDelay set the boot delay for finding relays. 启动延迟
 // We won't attempt any reservation if we've have less than a minimum number of candidates.
 // This prevents us to connect to the "first best" relay, and allows us to carefully select the relay.
 // However, in case we haven't found enough relays after the boot delay, we use what we have.
@@ -148,7 +150,7 @@ func WithBackoff(d time.Duration) Option {
 	}
 }
 
-// WithCircuitV1Support enables support for circuit v1 relays.
+// WithCircuitV1Support enables support for circuit v1 relays. 是否支持circuit v1 relays
 func WithCircuitV1Support() Option {
 	return func(c *config) error {
 		c.enableCircuitV1 = true
@@ -156,7 +158,7 @@ func WithCircuitV1Support() Option {
 	}
 }
 
-// WithMaxCandidateAge sets the maximum age of a candidate.
+// WithMaxCandidateAge sets the maximum age of a candidate. 候选者最大age
 // When we are connected to the desired number of relays, we don't ask the peer source for new candidates.
 // This can lead to AutoRelay's candidate list becoming outdated, and means we won't be able
 // to quickly establish a new relay connection if our existing connection breaks, if all the candidates

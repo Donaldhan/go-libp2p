@@ -16,7 +16,7 @@ type DelimitedReader struct {
 	buf []byte
 }
 
-// The gogo protobuf NewDelimitedReader is buffered, which may eat up stream data.
+// The gogo protobuf NewDelimitedReader is buffered, which may eat up stream data. NewDelimitedReader可以一次性取出缓存区中的所有流数据
 // So we need to implement a compatible delimited reader that reads unbuffered.
 // There is a slowdown from unbuffered reading: when reading the message
 // it can take multiple single byte Reads to read the length and another Read
@@ -62,6 +62,7 @@ func (d *DelimitedReader) ReadMsg(msg proto.Message) error {
 	return proto.Unmarshal(buf, msg)
 }
 
+// 创建protoio 写缓冲区
 func NewDelimitedWriter(w io.Writer) protoio.WriteCloser {
 	return protoio.NewDelimitedWriter(w)
 }

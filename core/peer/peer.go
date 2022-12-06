@@ -105,7 +105,7 @@ func (id ID) ExtractPublicKey() (ic.PubKey, error) {
 	return pk, nil
 }
 
-// Validate checks if ID is empty or not.
+// Validate checks if ID is empty or not. 校验id
 func (id ID) Validate() error {
 	if id == ID("") {
 		return ErrEmptyPeerID

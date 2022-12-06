@@ -17,12 +17,13 @@ func init() {
 	record.RegisterType(&ReservationVoucher{})
 }
 
+// 中继Reservation信息
 type ReservationVoucher struct {
-	// Relay is the ID of the peer providing relay service
+	// Relay is the ID of the peer providing relay service peer中继节点id
 	Relay peer.ID
-	// Peer is the ID of the peer receiving relay service through Relay
+	// Peer is the ID of the peer receiving relay service through Relay peer节点
 	Peer peer.ID
-	// Expiration is the expiration time of the reservation
+	// Expiration is the expiration time of the reservation 过期时间
 	Expiration time.Time
 }
 

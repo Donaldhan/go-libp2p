@@ -6,7 +6,7 @@ import (
 	ma "github.com/multiformats/go-multiaddr"
 )
 
-// AddrAction represents an action taken on one of a Host's listen addresses.
+// AddrAction represents an action taken on one of a Host's listen addresses. 表示地址监听上的动作
 // It is used to add context to address change events in EvtLocalAddressesUpdated.
 type AddrAction int
 
@@ -28,12 +28,14 @@ const (
 
 // UpdatedAddress is used in the EvtLocalAddressesUpdated event to convey
 // address change information.
+// 用户更新EvtLocalAddressesUpdated事件， 传达事件变更信息
 type UpdatedAddress struct {
-	// Address contains the address that was updated.
+	// Address contains the address that was updated. 更新的地址
 	Address ma.Multiaddr
 
 	// Action indicates what action was taken on the address during the
 	// event. May be Unknown if the event producer cannot produce diffs.
+	// 地址上的动作
 	Action AddrAction
 }
 
@@ -64,20 +66,20 @@ type UpdatedAddress struct {
 type EvtLocalAddressesUpdated struct {
 
 	// Diffs indicates whether this event contains a diff of the Host's previous
-	// address set.
+	// address set. 地址是否变更
 	Diffs bool
 
-	// Current contains all current listen addresses for the Host.
+	// Current contains all current listen addresses for the Host. host当前监听的地址
 	// If Diffs == true, the Action field of each UpdatedAddress will tell
 	// you whether an address was Added, or was Maintained from the previous
-	// state.
+	// state. 更新的地址
 	Current []UpdatedAddress
 
 	// Removed contains addresses that were removed from the Host.
-	// This field is only set when Diffs == true.
+	// This field is only set when Diffs == true. 移除的地址
 	Removed []UpdatedAddress
 
 	// SignedPeerRecord contains our own updated peer.PeerRecord, listing the addresses enumerated in Current.
-	// wrapped in a record.Envelope and signed by the Host's private key.
+	// wrapped in a record.Envelope and signed by the Host's private key. 签名消息（peer.PeerRecord）
 	SignedPeerRecord *record.Envelope
 }

@@ -113,7 +113,7 @@ type AddrBook interface {
 	// they will be sent along through the channel as well.
 	AddrStream(context.Context, peer.ID) <-chan ma.Multiaddr
 
-	// ClearAddresses removes all previously stored addresses.
+	// ClearAddresses removes all previously stored addresses. 清除先前存储的地址
 	ClearAddrs(p peer.ID)
 
 	// PeersWithAddrs returns all of the peer IDs stored in the AddrBook.
@@ -237,7 +237,7 @@ type ProtoBook interface {
 	RemoveProtocols(peer.ID, ...string) error
 
 	// SupportsProtocols returns the set of protocols the peer supports from among the given protocols.
-	// If the returned error is not nil, the result is indeterminate.
+	// If the returned error is not nil, the result is indeterminate. 返回peer支持的中继协议
 	SupportsProtocols(peer.ID, ...string) ([]string, error)
 
 	// FirstSupportedProtocol returns the first protocol that the peer supports among the given protocols.

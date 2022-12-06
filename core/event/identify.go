@@ -3,6 +3,7 @@ package event
 import "github.com/libp2p/go-libp2p/core/peer"
 
 // EvtPeerIdentificationCompleted is emitted when the initial identification round for a peer is completed.
+// 当身份round完成时，发出的事件
 type EvtPeerIdentificationCompleted struct {
 	// Peer is the ID of the peer whose identification succeeded.
 	Peer peer.ID

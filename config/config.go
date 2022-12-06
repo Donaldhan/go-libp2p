@@ -113,8 +113,8 @@ type Config struct {
 	Routing RoutingC //peer路由
 
 	EnableAutoRelay bool
-	AutoRelayOpts   []autorelay.Option
-	AutoNATConfig   //auto nat config
+	AutoRelayOpts   []autorelay.Option //autorelay 中继器配置
+	AutoNATConfig                      //auto nat config 配置
 
 	EnableHolePunching  bool
 	HolePunchingOptions []holepunch.Option
@@ -279,7 +279,7 @@ func (cfg *Config) addTransports(h host.Host) error {
 // NewNode constructs a new libp2p Host from the Config.
 //
 // This function consumes the config. Do not reuse it (really!).
-// 创建node
+// 创建node，同时开启中继探测服务
 func (cfg *Config) NewNode() (host.Host, error) {
 	swrm, err := cfg.makeSwarm()
 	if err != nil {
@@ -287,7 +287,7 @@ func (cfg *Config) NewNode() (host.Host, error) {
 	}
 	//创建host
 	h, err := bhost.NewHost(swrm, &bhost.HostOpts{
-		ConnManager:         cfg.ConnManager,
+		ConnManager:         cfg.ConnManager, //连接管理器
 		AddrsFactory:        cfg.AddrsFactory,
 		NATManager:          cfg.NATManager,
 		EnablePing:          !cfg.DisablePing,
@@ -345,7 +345,7 @@ func (cfg *Config) NewNode() (host.Host, error) {
 			h.Close()
 			return nil, fmt.Errorf("cannot enable autorelay; relay is not enabled")
 		}
-		//中继节点
+		//创建自动中继服务，发现中继器
 		ar, err = autorelay.NewAutoRelay(h, cfg.AutoRelayOpts...)
 		if err != nil {
 			return nil, err
@@ -407,7 +407,7 @@ func (cfg *Config) NewNode() (host.Host, error) {
 	if cfg.AutoNATConfig.ForceReachability != nil {
 		autonatOpts = append(autonatOpts, autonat.WithReachability(*cfg.AutoNATConfig.ForceReachability))
 	}
-
+	//创建autonat
 	autonat, err := autonat.New(h, autonatOpts...)
 	if err != nil {
 		h.Close()
@@ -424,6 +424,7 @@ func (cfg *Config) NewNode() (host.Host, error) {
 		ho = routed.Wrap(h, router)
 	}
 	if ar != nil {
+		//创建自动中继Host
 		return autorelay.NewAutoRelayHost(ho, ar), nil
 	}
 	return ho, nil

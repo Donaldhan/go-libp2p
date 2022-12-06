@@ -26,7 +26,7 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 type CircuitRelay_Status int32
 
 const (
-	CircuitRelay_SUCCESS                    CircuitRelay_Status = 100
+	CircuitRelay_SUCCESS                    CircuitRelay_Status = 100 //成功
 	CircuitRelay_HOP_SRC_ADDR_TOO_LONG      CircuitRelay_Status = 220
 	CircuitRelay_HOP_DST_ADDR_TOO_LONG      CircuitRelay_Status = 221
 	CircuitRelay_HOP_SRC_MULTIADDR_INVALID  CircuitRelay_Status = 250
@@ -111,7 +111,7 @@ const (
 	CircuitRelay_HOP     CircuitRelay_Type = 1
 	CircuitRelay_STOP    CircuitRelay_Type = 2
 	CircuitRelay_STATUS  CircuitRelay_Type = 3
-	CircuitRelay_CAN_HOP CircuitRelay_Type = 4
+	CircuitRelay_CAN_HOP CircuitRelay_Type = 4 //hop协议
 )
 
 var CircuitRelay_Type_name = map[int32]string{
@@ -150,12 +150,12 @@ func (x *CircuitRelay_Type) UnmarshalJSON(data []byte) error {
 func (CircuitRelay_Type) EnumDescriptor() ([]byte, []int) {
 	return fileDescriptor_129c008e7addef67, []int{0, 1}
 }
-
+//中继器
 type CircuitRelay struct {
-	Type                 *CircuitRelay_Type   `protobuf:"varint,1,opt,name=type,enum=circuitv1.pb.CircuitRelay_Type" json:"type,omitempty"`
-	SrcPeer              *CircuitRelay_Peer   `protobuf:"bytes,2,opt,name=srcPeer" json:"srcPeer,omitempty"`
-	DstPeer              *CircuitRelay_Peer   `protobuf:"bytes,3,opt,name=dstPeer" json:"dstPeer,omitempty"`
-	Code                 *CircuitRelay_Status `protobuf:"varint,4,opt,name=code,enum=circuitv1.pb.CircuitRelay_Status" json:"code,omitempty"`
+	Type                 *CircuitRelay_Type   `protobuf:"varint,1,opt,name=type,enum=circuitv1.pb.CircuitRelay_Type" json:"type,omitempty"` //中继类型
+	SrcPeer              *CircuitRelay_Peer   `protobuf:"bytes,2,opt,name=srcPeer" json:"srcPeer,omitempty"` //中继源peer
+	DstPeer              *CircuitRelay_Peer   `protobuf:"bytes,3,opt,name=dstPeer" json:"dstPeer,omitempty"` //中继目的peer
+	Code                 *CircuitRelay_Status `protobuf:"varint,4,opt,name=code,enum=circuitv1.pb.CircuitRelay_Status" json:"code,omitempty"` //中继终态
 	XXX_NoUnkeyedLiteral struct{}             `json:"-"`
 	XXX_unrecognized     []byte               `json:"-"`
 	XXX_sizecache        int32                `json:"-"`
@@ -223,8 +223,8 @@ func (m *CircuitRelay) GetCode() CircuitRelay_Status {
 }
 
 type CircuitRelay_Peer struct {
-	Id                   []byte   `protobuf:"bytes,1,req,name=id" json:"id,omitempty"`
-	Addrs                [][]byte `protobuf:"bytes,2,rep,name=addrs" json:"addrs,omitempty"`
+	Id                   []byte   `protobuf:"bytes,1,req,name=id" json:"id,omitempty"` //中继peer的id
+	Addrs                [][]byte `protobuf:"bytes,2,rep,name=addrs" json:"addrs,omitempty"` //中继peer地址
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`

@@ -31,11 +31,12 @@ type AutoRelay struct {
 	addrsF basic.AddrsFactory //地址工厂
 }
 
+// 新建自动中继器
 func NewAutoRelay(bhost *basic.BasicHost, opts ...Option) (*AutoRelay, error) {
 	r := &AutoRelay{
 		host:   bhost,
 		addrsF: bhost.AddrsFactory,
-		status: network.ReachabilityUnknown,
+		status: network.ReachabilityUnknown, //不可达
 	}
 	conf := defaultConfig
 	for _, opt := range opts {
@@ -45,24 +46,27 @@ func NewAutoRelay(bhost *basic.BasicHost, opts ...Option) (*AutoRelay, error) {
 	}
 	r.ctx, r.ctxCancel = context.WithCancel(context.Background())
 	r.conf = &conf
+	//新建中继发现器，从配置的peer源
 	r.relayFinder = newRelayFinder(bhost, conf.peerSource, &conf)
 	bhost.AddrsFactory = r.hostAddrs
 
-	r.refCount.Add(1)
+	r.refCount.Add(1) //CountDownLock 自增
 	go func() {
-		defer r.refCount.Done()
+		defer r.refCount.Done() //background执行完，CountDown
 		r.background()
 	}()
 	return r, nil
 }
 
+// 探测节点可达性NAT，PMP， IGD，如果网络非ReachabilityPublic，则启动中继探测；如果可达，则停止中继探测
 func (r *AutoRelay) background() {
+	//订阅当本地节点可达状态变更时，emit event
 	subReachability, err := r.host.EventBus().Subscribe(new(event.EvtLocalReachabilityChanged))
 	if err != nil {
 		log.Debug("failed to subscribe to the EvtLocalReachabilityChanged")
 		return
 	}
-	defer subReachability.Close()
+	defer subReachability.Close() //退出关闭订阅
 
 	for {
 		select {
@@ -75,11 +79,11 @@ func (r *AutoRelay) background() {
 			// TODO: push changed addresses
 			evt := ev.(event.EvtLocalReachabilityChanged)
 			switch evt.Reachability {
-			case network.ReachabilityPrivate, network.ReachabilityUnknown:
-				if err := r.relayFinder.Start(); err != nil {
+			case network.ReachabilityPrivate, network.ReachabilityUnknown: //不可达
+				if err := r.relayFinder.Start(); err != nil { //启动发现中继器
 					log.Errorw("failed to start relay finder", "error", err)
 				}
-			case network.ReachabilityPublic:
+			case network.ReachabilityPublic: //网络可达，则停止发现中继器
 				r.relayFinder.Stop()
 			}
 			r.mx.Lock()
