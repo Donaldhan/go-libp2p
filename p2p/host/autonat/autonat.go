@@ -21,7 +21,7 @@ import (
 var log = logging.Logger("autonat")
 
 // AmbientAutoNAT is the implementation of ambient NAT autodiscovery
-// AmbientAutoNAT自动发现法务
+// AmbientAutoNAT自动探测
 type AmbientAutoNAT struct {
 	host host.Host
 
@@ -273,9 +273,9 @@ func (as *AmbientAutoNAT) cleanupRecentProbes() {
 
 // scheduleProbe calculates when the next probe should be scheduled for.
 // 计算下次探测调度时间
-// 1. 如果为未知状态，或者低confidence，应该放弃AutoNATRetryInterval
-// 2. 当网络可达，应该减少尝试
-// 3. 最近连接的连接不可公网可达，我们应该积极的尝试
+// 1. 如果网络状为未知状态，或者低confidence（<3），使用默认的retryInterval
+// 2. 如果当网络状态为公网可达，应该减少尝试，下次调度时间增大（retryIntervalt * 2）
+// 3. 如果网络状态为的公网不可达，我们应该积极的尝试（retryIntervalt / 2）
 func (as *AmbientAutoNAT) scheduleProbe() time.Duration {
 	// Our baseline is a probe every 'AutoNATRefreshInterval' 探测基准为AutoNATRefreshInterval间隔
 	// This is modulated by:
