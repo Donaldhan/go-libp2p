@@ -105,7 +105,7 @@ func (as *autoNATService) handleStream(s network.Stream) {
 }
 
 // 处理拨号请求(远端peerId，远端多播地址，peer信息)
-// 1.
+// 1. 验证peerId，ip信息，如果没有问题，
 func (as *autoNATService) handleDial(p peer.ID, obsaddr ma.Multiaddr, mpi *pb.Message_PeerInfo) *pb.Message_DialResponse {
 	if mpi == nil { //拨号底子为空，bad请求，peer信息缺失
 		return newDialResponseError(pb.Message_E_BAD_REQUEST, "missing peer info")
